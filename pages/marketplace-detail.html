@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 策略详情</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <style>
+        .detail-header {
+            padding: 16px 20px;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+        }
+
+        .author-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .author-name i {
+            color: #3B82F6;
+            font-size: 12px;
+        }
+
+        .author-stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .strategy-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .strategy-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .meta-tag {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-type {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-primary);
+        }
+
+        .tag-risk-conservative {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+        }
+
+        .tag-risk-balanced {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+
+        .tag-risk-aggressive {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+        }
+
+        .pricing-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .price-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .price-value.free {
+            color: #22C55E;
+        }
+
+        .price-value.paid {
+            color: var(--color-primary);
+        }
+
+        .price-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .stats-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .stat-badge {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .stat-badge i {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .perf-toggle {
+            display: flex;
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .perf-toggle-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .perf-toggle-btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .perf-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .perf-stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .perf-stat-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .perf-stat-value.positive {
+            color: #22C55E;
+        }
+
+        .perf-stat-value.negative {
+            color: #EF4444;
+        }
+
+        .perf-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .period-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .description-section {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .desc-item {
+            margin-bottom: 14px;
+        }
+
+        .desc-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .desc-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .desc-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .changelog-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .changelog-item:last-child {
+            border-bottom: none;
+        }
+
+        .changelog-version {
+            flex-shrink: 0;
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-primary);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .changelog-content {
+            flex: 1;
+        }
+
+        .changelog-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .changelog-text {
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            position: fixed;
+            bottom: 83px;
+            left: 0;
+            right: 0;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, transparent 0%, var(--bg-dark) 20%);
+            display: flex;
+            gap: 10px;
+            z-index: 50;
+        }
+
+        .btn-purchase {
+            flex: 2;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #8B5CF6 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-purchase:disabled {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            box-shadow: none;
+        }
+
+        .btn-secondary-action {
+            flex: 1;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .purchased-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .risk-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .risk-warning-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #EF4444;
+            margin-bottom: 6px;
+        }
+
+        .risk-warning-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">21:46</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content" style="padding-bottom: 160px;">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="marketplace.html" style="color: var(--text-primary); font-size: 20px;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;">策略详情</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="padding: 8px; border-radius: 8px;">
+                <i class="fas fa-share-alt"></i>
+            </button>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;" id="detailContent">
+            <!-- 动态渲染 -->
+        </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons" id="actionButtons">
+        <!-- 动态渲染 -->
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="marketplace.html" class="tab-item active">
+            <i class="fas fa-store"></i>
+            <span>市场</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+    </div>
+
+    <script>
+        let currentStrategy = null;
+        let perfMode = 'backtest'; // backtest | live
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const strategyId = localStorage.getItem('current_marketplace_strategy');
+            if (!strategyId) {
+                window.location.href = 'marketplace.html';
+                return;
+            }
+
+            currentStrategy = store.getMarketplaceStrategy(strategyId);
+            if (!currentStrategy) {
+                window.location.href = 'marketplace.html';
+                return;
+            }
+
+            renderDetail();
+            renderActions();
+        });
+
+        function renderDetail() {
+            const s = currentStrategy;
+            const perf = s.performance[perfMode];
+            const isPurchased = store.isPurchased(s.id);
+
+            document.getElementById('detailContent').innerHTML = `
+        <!-- 作者信息 -->
+        <div class="author-card">
+          <img src="${s.author.avatar}" alt="${s.author.nickname}" class="author-avatar">
+          <div class="author-info">
+            <div class="author-name">
+              ${s.author.nickname}
+              ${s.author.verified ? '<i class="fas fa-check-circle"></i>' : ''}
+            </div>
+            <div class="author-stats">${s.author.total_strategies} 个策略 · ${s.author.total_subscribers.toLocaleString()} 订阅者</div>
+          </div>
+          ${isPurchased ? '<span class="purchased-badge"><i class="fas fa-check"></i> 已购买</span>' : ''}
+        </div>
+
+        <!-- 策略标题 -->
+        <h1 class="strategy-title">${s.name}</h1>
+        
+        <!-- 标签 -->
+        <div class="strategy-meta">
+          <span class="meta-tag tag-type">${store.getTypeLabel(s.type)}</span>
+          <span class="meta-tag tag-risk-${s.risk_level}">${store.getRiskLabel(s.risk_level)}</span>
+          <span class="meta-tag" style="background: var(--bg-card); color: var(--text-secondary);">v${s.version}</span>
+        </div>
+
+        <!-- 统计徽章 -->
+        <div class="stats-row">
+          <div class="stat-badge"><i class="fas fa-users"></i> ${s.stats.subscribers.toLocaleString()} 订阅</div>
+          <div class="stat-badge"><i class="fas fa-copy"></i> ${s.stats.copies.toLocaleString()} 复制</div>
+          <div class="stat-badge"><i class="fas fa-play"></i> ${s.stats.running_users} 运行中</div>
+          <div class="stat-badge"><i class="fas fa-star"></i> ${s.stats.reviews}</div>
+        </div>
+
+        <!-- 定价信息 -->
+        <div class="pricing-display">
+          <div>
+            <div class="price-value ${s.pricing.type === 'free' ? 'free' : 'paid'}">
+              ${store.getPricingLabel(s.pricing)}
+            </div>
+            <div class="price-label">
+              ${s.pricing.type === 'subscription' ? '月订阅价格' : s.pricing.type === 'profit_share' ? '收益分成比例' : '免费使用'}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: 500;">支持交易所</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">${s.supported_exchanges.join(' / ')}</div>
+          </div>
+        </div>
+
+        <!-- 表现切换 -->
+        <div class="section-title">
+          <i class="fas fa-chart-line" style="color: var(--color-primary);"></i>
+          策略表现
+        </div>
+        
+        <div class="perf-toggle">
+          <div class="perf-toggle-btn ${perfMode === 'backtest' ? 'active' : ''}" onclick="switchPerf('backtest')">
+            <i class="fas fa-history"></i> 回测表现
+          </div>
+          <div class="perf-toggle-btn ${perfMode === 'live' ? 'active' : ''}" onclick="switchPerf('live')">
+            <i class="fas fa-broadcast-tower"></i> 实盘表现
+          </div>
+        </div>
+
+        <div class="period-label">
+          <i class="fas fa-calendar-alt"></i> ${perf.period}
+        </div>
+
+        <!-- 表现数据 -->
+        <div class="perf-stats">
+          <div class="perf-stat-card">
+            <div class="perf-stat-value ${perf.return_total >= 0 ? 'positive' : 'negative'}">
+              ${perf.return_total >= 0 ? '+' : ''}${perf.return_total}%
+            </div>
+            <div class="perf-stat-label">累计收益率</div>
+          </div>
+          <div class="perf-stat-card">
+            <div class="perf-stat-value negative">${perf.max_drawdown}%</div>
+            <div class="perf-stat-label">最大回撤</div>
+          </div>
+          <div class="perf-stat-card">
+            <div class="perf-stat-value">${perf.sharpe_ratio}</div>
+            <div class="perf-stat-label">夏普比率</div>
+          </div>
+          <div class="perf-stat-card">
+            <div class="perf-stat-value">${perf.win_rate}%</div>
+            <div class="perf-stat-label">胜率</div>
+          </div>
+        </div>
+
+        <!-- 收益曲线 -->
+        <div class="chart-container" style="margin-bottom: 16px;">
+          <canvas id="perfChart" height="180"></canvas>
+        </div>
+
+        <!-- 策略说明 -->
+        <div class="section-title">
+          <i class="fas fa-info-circle" style="color: var(--color-primary);"></i>
+          策略说明
+        </div>
+        
+        <div class="description-section">
+          <div class="desc-item">
+            <div class="desc-label">策略简介</div>
+            <div class="desc-content">${s.description.summary}</div>
+          </div>
+          <div class="desc-item">
+            <div class="desc-label">适合行情</div>
+            <div class="desc-content">${s.description.suitable_market}</div>
+          </div>
+          <div class="desc-item">
+            <div class="desc-label">交易逻辑</div>
+            <div class="desc-content">${s.description.logic}</div>
+          </div>
+          <div class="risk-warning">
+            <div class="risk-warning-title">
+              <i class="fas fa-exclamation-triangle"></i> 风险提示
+            </div>
+            <div class="risk-warning-text">${s.description.risk_warning}</div>
+          </div>
+        </div>
+
+        <!-- 版本更新 -->
+        <div class="section-title">
+          <i class="fas fa-code-branch" style="color: var(--color-primary);"></i>
+          版本更新
+        </div>
+        
+        <div class="description-section" style="padding: 12px;">
+          ${s.changelog.map(log => `
+            <div class="changelog-item">
+              <span class="changelog-version">${log.version}</span>
+              <div class="changelog-content">
+                <div class="changelog-date">${log.date}</div>
+                <div class="changelog-text">${log.content}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- 支持币对 -->
+        <div class="section-title">
+          <i class="fas fa-coins" style="color: var(--color-primary);"></i>
+          支持币对
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;">
+          ${s.supported_pairs.map(pair => `
+            <span style="padding: 8px 14px; background: var(--bg-card); border-radius: 10px; font-size: 13px;">${pair}</span>
+          `).join('')}
+        </div>
+      `;
+
+            // 渲染图表
+            setTimeout(() => renderChart(perf.monthly_returns), 100);
+        }
+
+        function renderActions() {
+            const isPurchased = store.isPurchased(currentStrategy.id);
+
+            document.getElementById('actionButtons').innerHTML = isPurchased ? `
+        <button class="btn-secondary-action" onclick="goToMyStrategies()">
+          <i class="fas fa-list"></i> 我的策略
+        </button>
+        <button class="btn-purchase" onclick="runStrategy()">
+          <i class="fas fa-play"></i> 运行策略
+        </button>
+      ` : `
+        <button class="btn-secondary-action" onclick="previewBacktest()">
+          <i class="fas fa-history"></i> 回测
+        </button>
+        <button class="btn-purchase" onclick="purchaseStrategy()">
+          <i class="fas fa-shopping-cart"></i> 
+          ${currentStrategy.pricing.type === 'free' ? '免费获取' : '订阅策略'}
+        </button>
+      `;
+        }
+
+        function switchPerf(mode) {
+            perfMode = mode;
+            renderDetail();
+        }
+
+        function renderChart(monthlyReturns) {
+            const ctx = document.getElementById('perfChart');
+            if (!ctx) return;
+
+            const labels = monthlyReturns.length <= 6
+                ? monthlyReturns.map((_, i) => `第${i + 1}月`)
+                : ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].slice(0, monthlyReturns.length);
+
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 180);
+            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+            gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '月收益',
+                        data: monthlyReturns,
+                        borderColor: '#22C55E',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#22C55E',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748B', font: { size: 10 } } },
+                        y: {
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                            ticks: { color: '#64748B', font: { size: 10 }, callback: v => v + '%' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function purchaseStrategy() {
+            const result = store.purchaseStrategy(currentStrategy.id);
+            if (result.success) {
+                showToast('已导入到我的策略，可一键回测/运行', 'success');
+                setTimeout(() => {
+                    window.location.href = 'strategies.html';
+                }, 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+
+        function goToMyStrategies() {
+            window.location.href = 'strategies.html';
+        }
+
+        function runStrategy() {
+            showToast('策略已开始运行', 'success');
+        }
+
+        function previewBacktest() {
+            showToast('查看回测详情', 'info');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 回测配置</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="../js/mock-data.js"></script>
+    <style>
+        .config-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .config-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-title i {
+            color: var(--color-primary);
+        }
+
+        .period-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .period-option {
+            padding: 12px 8px;
+            text-align: center;
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .period-option:hover {
+            border-color: var(--color-primary);
+        }
+
+        .period-option.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .timeframe-options {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+
+        .timeframe-option {
+            padding: 10px 4px;
+            text-align: center;
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timeframe-option:hover {
+            border-color: var(--color-primary);
+        }
+
+        .timeframe-option.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+
+        .input-with-unit input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .input-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        .strategy-info-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .strategy-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .strategy-info-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .strategy-info-type {
+            padding: 4px 12px;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--color-primary);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .strategy-info-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .btn-backtest {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #8B5CF6 100%);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+        }
+
+        .btn-backtest:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-backtest:disabled {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-backtest.loading {
+            pointer-events: none;
+        }
+
+        .btn-backtest.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 4px;
+            background: var(--bg-card);
+            border-radius: 2px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), #8B5CF6);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">21:46</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="strategies.html" style="color: var(--text-primary); font-size: 20px;" id="backBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;">回测配置</span>
+            </div>
+            <div></div>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;">
+            <!-- 策略信息卡 -->
+            <div class="strategy-info-card" id="strategyInfo">
+                <!-- 动态渲染 -->
+            </div>
+
+            <!-- 回测区间 -->
+            <div class="config-card">
+                <div class="config-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    回测区间
+                </div>
+                <div class="period-options" id="periodOptions">
+                    <div class="period-option" data-period="30d">30天</div>
+                    <div class="period-option active" data-period="90d">90天</div>
+                    <div class="period-option" data-period="1y">1年</div>
+                    <div class="period-option" data-period="custom">自定义</div>
+                </div>
+            </div>
+
+            <!-- K线周期 -->
+            <div class="config-card">
+                <div class="config-title">
+                    <i class="fas fa-chart-bar"></i>
+                    K线周期
+                </div>
+                <div class="timeframe-options" id="timeframeOptions">
+                    <div class="timeframe-option" data-tf="1m">1分</div>
+                    <div class="timeframe-option" data-tf="5m">5分</div>
+                    <div class="timeframe-option" data-tf="15m">15分</div>
+                    <div class="timeframe-option active" data-tf="1h">1时</div>
+                    <div class="timeframe-option" data-tf="4h">4时</div>
+                    <div class="timeframe-option" data-tf="1d">日线</div>
+                </div>
+            </div>
+
+            <!-- 资金与手续费 -->
+            <div class="config-card">
+                <div class="config-title">
+                    <i class="fas fa-wallet"></i>
+                    资金设置
+                </div>
+                <div class="input-group">
+                    <label class="input-label">初始资金</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="initialCapital" value="10000" min="100" step="100">
+                        <span class="input-unit">USDT</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">手续费率</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="feeRate" value="0.1" min="0" max="1" step="0.01">
+                        <span class="input-unit">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">滑点</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="slippage" value="0.05" min="0" max="1" step="0.01">
+                        <span class="input-unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 开始回测按钮 -->
+            <button class="btn-backtest" id="startBtn" onclick="startBacktest()">
+                <i class="fas fa-play"></i>
+                开始回测
+            </button>
+
+            <!-- 底部占位 -->
+            <div style="height: 100px;"></div>
+        </div>
+    </div>
+
+    <!-- Loading遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在执行回测...</div>
+        <div class="loading-progress">
+            <div class="loading-progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item active">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="marketplace.html" class="tab-item">
+            <i class="fas fa-store"></i>
+            <span>市场</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+    </div>
+
+    <script>
+        let currentStrategy = null;
+        let selectedPeriod = '90d';
+        let selectedTimeframe = '1h';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const strategyId = localStorage.getItem('current_strategy_id');
+            if (!strategyId) {
+                showToast('未选择策略', 'error');
+                setTimeout(() => window.location.href = 'strategies.html', 1500);
+                return;
+            }
+
+            currentStrategy = store.getMyStrategies().find(s => s.id === strategyId);
+            if (!currentStrategy) {
+                showToast('策略不存在', 'error');
+                setTimeout(() => window.location.href = 'strategies.html', 1500);
+                return;
+            }
+
+            renderStrategyInfo();
+            setupEventListeners();
+        });
+
+        function renderStrategyInfo() {
+            const s = currentStrategy;
+            document.getElementById('strategyInfo').innerHTML = `
+                <div class="strategy-info-header">
+                    <span class="strategy-info-name">${s.name}</span>
+                    <span class="strategy-info-type">${store.getTypeLabel(s.type)}</span>
+                </div>
+                <div class="strategy-info-stats">
+                    <span><i class="fas fa-coins"></i> ${s.supported_pairs?.join(', ') || 'BTC/USDT'}</span>
+                    <span><i class="fas fa-shield-alt"></i> ${store.getRiskLabel(s.risk_level)}</span>
+                    <span><i class="fas fa-clock"></i> ${s.running_days || 0} 天</span>
+                </div>
+            `;
+        }
+
+        function setupEventListeners() {
+            // 区间选择
+            document.querySelectorAll('.period-option').forEach(opt => {
+                opt.addEventListener('click', function () {
+                    document.querySelectorAll('.period-option').forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedPeriod = this.dataset.period;
+                });
+            });
+
+            // K线周期选择
+            document.querySelectorAll('.timeframe-option').forEach(opt => {
+                opt.addEventListener('click', function () {
+                    document.querySelectorAll('.timeframe-option').forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedTimeframe = this.dataset.tf;
+                });
+            });
+        }
+
+        function startBacktest() {
+            const btn = document.getElementById('startBtn');
+            const overlay = document.getElementById('loadingOverlay');
+            const progressBar = document.getElementById('progressBar');
+
+            // 收集配置
+            const config = {
+                period: selectedPeriod,
+                timeframe: selectedTimeframe,
+                initial_capital: parseFloat(document.getElementById('initialCapital').value) || 10000,
+                fee_rate: parseFloat(document.getElementById('feeRate').value) / 100 || 0.001,
+                slippage: parseFloat(document.getElementById('slippage').value) / 100 || 0.0005
+            };
+
+            // 显示loading
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fas fa-spinner"></i> 回测中...';
+            btn.disabled = true;
+            overlay.classList.add('show');
+
+            // 模拟进度
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 95) progress = 95;
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            // 2秒后完成
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+
+                // 执行回测
+                const result = store.runBacktest(currentStrategy.id, config);
+
+                setTimeout(() => {
+                    if (result.success) {
+                        localStorage.setItem('current_backtest_id', result.backtestId);
+                        window.location.href = 'backtest-report.html';
+                    } else {
+                        overlay.classList.remove('show');
+                        btn.classList.remove('loading');
+                        btn.innerHTML = '<i class="fas fa-play"></i> 开始回测';
+                        btn.disabled = false;
+                        showToast(result.message, 'error');
+                    }
+                }, 300);
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>

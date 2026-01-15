@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 回测报告</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <style>
+        .report-header {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .report-header.negative {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+        }
+
+        .return-value {
+            font-size: 42px;
+            font-weight: 700;
+        }
+
+        .return-value.positive {
+            color: var(--color-success);
+        }
+
+        .return-value.negative {
+            color: var(--color-danger);
+        }
+
+        .return-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .history-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+        }
+
+        .history-selector label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .history-selector select {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .history-selector select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .config-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .config-tag {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--color-primary);
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .trade-list {
+            background: var(--bg-card);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .trade-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .trade-item:last-child {
+            border-bottom: none;
+        }
+
+        .trade-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+
+        .trade-icon.buy {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--color-success);
+        }
+
+        .trade-icon.sell {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        .trade-info {
+            flex: 1;
+        }
+
+        .trade-pair {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .trade-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .trade-details {
+            text-align: right;
+        }
+
+        .trade-price {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .trade-pnl {
+            font-size: 12px;
+        }
+
+        .trade-pnl.positive {
+            color: var(--color-success);
+        }
+
+        .trade-pnl.negative {
+            color: var(--color-danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #8B5CF6 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-retest {
+            flex: 1;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .show-more-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--color-primary);
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">21:46</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="strategies.html" style="color: var(--text-primary); font-size: 20px;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;">回测报告</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="padding: 8px; border-radius: 8px;">
+                <i class="fas fa-share-alt"></i>
+            </button>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;" id="reportContent">
+            <!-- 动态渲染 -->
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item active">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="marketplace.html" class="tab-item">
+            <i class="fas fa-store"></i>
+            <span>市场</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+    </div>
+
+    <script>
+        let currentBacktest = null;
+        let allBacktests = [];
+        let equityChart = null;
+        let monthlyChart = null;
+        let showAllTrades = false;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const backtestId = localStorage.getItem('current_backtest_id');
+            if (!backtestId) {
+                showToast('未找到回测记录', 'error');
+                setTimeout(() => window.location.href = 'strategies.html', 1500);
+                return;
+            }
+
+            currentBacktest = store.getBacktest(backtestId);
+            if (!currentBacktest) {
+                showToast('回测记录不存在', 'error');
+                setTimeout(() => window.location.href = 'strategies.html', 1500);
+                return;
+            }
+
+            // 获取该策略的所有回测
+            allBacktests = store.getBacktestsByStrategy(currentBacktest.strategy_id);
+
+            renderReport();
+        });
+
+        function renderReport() {
+            const bt = currentBacktest;
+            const m = bt.metrics;
+            const isPositive = m.return_total >= 0;
+
+            document.getElementById('reportContent').innerHTML = `
+                <!-- 历史回测选择 -->
+                ${allBacktests.length > 1 ? `
+                <div class="history-selector">
+                    <label><i class="fas fa-history"></i> 历史回测</label>
+                    <select id="historySelect" onchange="switchBacktest(this.value)">
+                        ${allBacktests.map(b => `
+                            <option value="${b.id}" ${b.id === bt.id ? 'selected' : ''}>
+                                ${new Date(b.created_at).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} - ${b.config.period}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                ` : ''}
+
+                <!-- 策略名称 -->
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${bt.strategy_name}</div>
+                
+                <!-- 配置摘要 -->
+                <div class="config-summary">
+                    <span class="config-tag"><i class="fas fa-calendar"></i> ${bt.config.period}</span>
+                    <span class="config-tag"><i class="fas fa-chart-bar"></i> ${bt.config.timeframe}</span>
+                    <span class="config-tag"><i class="fas fa-wallet"></i> $${bt.config.initial_capital.toLocaleString()}</span>
+                    <span class="config-tag"><i class="fas fa-percent"></i> 费率 ${(bt.config.fee_rate * 100).toFixed(2)}%</span>
+                </div>
+
+                <!-- 总收益 -->
+                <div class="report-header ${isPositive ? '' : 'negative'}">
+                    <div class="return-value ${isPositive ? 'positive' : 'negative'}">
+                        ${isPositive ? '+' : ''}${m.return_total.toFixed(2)}%
+                    </div>
+                    <div class="return-label">累计收益率 (${bt.config.start_date} ~ ${bt.config.end_date})</div>
+                </div>
+
+                <!-- 关键指标 -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: ${m.return_30d >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}">
+                            ${m.return_30d >= 0 ? '+' : ''}${m.return_30d}%
+                        </div>
+                        <div class="metric-label">30日收益</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--color-danger)">-${m.max_drawdown}%</div>
+                        <div class="metric-label">最大回撤</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${m.sharpe_ratio}</div>
+                        <div class="metric-label">夏普比率</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${m.win_rate}%</div>
+                        <div class="metric-label">胜率</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${m.total_trades}</div>
+                        <div class="metric-label">交易次数</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${m.profit_factor}</div>
+                        <div class="metric-label">盈亏比</div>
+                    </div>
+                </div>
+
+                <!-- 净值曲线 -->
+                <div class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    净值曲线
+                </div>
+                <div class="chart-container">
+                    <canvas id="equityChart" height="180"></canvas>
+                </div>
+
+                <!-- 月度收益 -->
+                <div class="section-title">
+                    <i class="fas fa-chart-bar"></i>
+                    月度收益
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthlyChart" height="150"></canvas>
+                </div>
+
+                <!-- 交易列表 -->
+                <div class="section-title">
+                    <i class="fas fa-exchange-alt"></i>
+                    交易记录 (${bt.trades.length}笔)
+                </div>
+                <div class="trade-list" id="tradeList">
+                    ${renderTrades(bt.trades)}
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="action-buttons" style="margin-top: 20px;">
+                    <button class="btn-retest" onclick="retest()">
+                        <i class="fas fa-redo"></i>
+                        重新配置
+                    </button>
+                    <button class="btn-save" onclick="saveToStrategy()">
+                        <i class="fas fa-save"></i>
+                        保存结果
+                    </button>
+                </div>
+
+                <!-- 底部占位 -->
+                <div style="height: 100px;"></div>
+            `;
+
+            // 渲染图表
+            setTimeout(() => {
+                renderEquityChart();
+                renderMonthlyChart();
+            }, 100);
+        }
+
+        function renderTrades(trades) {
+            const displayTrades = showAllTrades ? trades : trades.slice(0, 20);
+            let html = displayTrades.map(t => `
+                <div class="trade-item">
+                    <div class="trade-icon ${t.type}">
+                        <i class="fas fa-arrow-${t.type === 'buy' ? 'down' : 'up'}"></i>
+                    </div>
+                    <div class="trade-info">
+                        <div class="trade-pair">${t.pair} · ${t.type === 'buy' ? '买入' : '卖出'}</div>
+                        <div class="trade-time">${t.time}</div>
+                    </div>
+                    <div class="trade-details">
+                        <div class="trade-price">$${t.price.toLocaleString()}</div>
+                        ${t.pnl !== null ? `
+                            <div class="trade-pnl ${t.pnl >= 0 ? 'positive' : 'negative'}">
+                                ${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}
+                            </div>
+                        ` : `<div class="trade-pnl" style="color: var(--text-muted);">${t.amount} 个</div>`}
+                    </div>
+                </div>
+            `).join('');
+
+            if (!showAllTrades && trades.length > 20) {
+                html += `<button class="show-more-btn" onclick="toggleShowAllTrades()">
+                    显示全部 ${trades.length} 笔交易 <i class="fas fa-chevron-down"></i>
+                </button>`;
+            }
+
+            return html;
+        }
+
+        function toggleShowAllTrades() {
+            showAllTrades = !showAllTrades;
+            document.getElementById('tradeList').innerHTML = renderTrades(currentBacktest.trades);
+        }
+
+        function renderEquityChart() {
+            const ctx = document.getElementById('equityChart');
+            if (!ctx) return;
+
+            const data = currentBacktest.equity_curve;
+            const labels = data.map((_, i) => i + 1);
+
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 180);
+            const isPositive = data[data.length - 1] >= data[0];
+            if (isPositive) {
+                gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+                gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+            } else {
+                gradient.addColorStop(0, 'rgba(239, 68, 68, 0.3)');
+                gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+            }
+
+            equityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '净值',
+                        data: data,
+                        borderColor: isPositive ? '#22C55E' : '#EF4444',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                            ticks: {
+                                color: '#64748B',
+                                font: { size: 10 },
+                                callback: v => '$' + (v / 1000).toFixed(1) + 'k'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMonthlyChart() {
+            const ctx = document.getElementById('monthlyChart');
+            if (!ctx) return;
+
+            const data = currentBacktest.monthly_returns;
+            const labels = data.length <= 3
+                ? data.map((_, i) => `第${i + 1}月`)
+                : ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].slice(0, data.length);
+
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '月收益',
+                        data: data,
+                        backgroundColor: data.map(v => v >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748B', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                            ticks: {
+                                color: '#64748B',
+                                font: { size: 10 },
+                                callback: v => v + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function switchBacktest(backtestId) {
+            localStorage.setItem('current_backtest_id', backtestId);
+            currentBacktest = store.getBacktest(backtestId);
+            showAllTrades = false;
+
+            // 销毁旧图表
+            if (equityChart) equityChart.destroy();
+            if (monthlyChart) monthlyChart.destroy();
+
+            renderReport();
+        }
+
+        function retest() {
+            localStorage.setItem('current_strategy_id', currentBacktest.strategy_id);
+            window.location.href = 'backtest-setup.html';
+        }
+
+        function saveToStrategy() {
+            const result = store.saveBacktestToStrategy(currentBacktest.id);
+            if (result.success) {
+                showToast('已保存回测结果到策略', 'success');
+                setTimeout(() => {
+                    window.location.href = 'strategies.html';
+                }, 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

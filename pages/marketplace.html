@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 策略市场</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="../js/mock-data.js"></script>
+    <style>
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        .filter-chip i {
+            margin-right: 4px;
+        }
+
+        .sort-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .sort-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 0;
+            min-width: 150px;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .sort-menu.show {
+            display: block;
+        }
+
+        .sort-option {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sort-option:hover {
+            background: var(--bg-input);
+        }
+
+        .sort-option.active {
+            color: var(--color-primary);
+        }
+
+        .strategy-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .strategy-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .strategy-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .strategy-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strategy-author img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .author-name {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .author-name i {
+            color: #3B82F6;
+            font-size: 10px;
+        }
+
+        .strategy-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .strategy-tags {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .strategy-tag {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .tag-type {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-primary);
+        }
+
+        .tag-risk-conservative {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+        }
+
+        .tag-risk-balanced {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+
+        .tag-risk-aggressive {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+        }
+
+        .strategy-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px 0;
+            background: var(--bg-input);
+            border-radius: 10px;
+        }
+
+        .stat-item .value {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .stat-item .value.positive {
+            color: #22C55E;
+        }
+
+        .stat-item .value.negative {
+            color: #EF4444;
+        }
+
+        .stat-item .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .strategy-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pricing-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pricing-free {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+        }
+
+        .pricing-subscription {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-primary);
+        }
+
+        .pricing-profit_share {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+
+        .subscribers-count {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">21:46</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="page-title">策略市场</div>
+            <div class="sort-dropdown">
+                <button class="sort-btn" onclick="toggleSortMenu()">
+                    <i class="fas fa-sort"></i>
+                    <span id="sort-label">收益率</span>
+                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                </button>
+                <div class="sort-menu" id="sortMenu">
+                    <div class="sort-option active" data-sort="return_30d" onclick="setSort('return_30d', '收益率')">
+                        <i class="fas fa-chart-line"></i> 30天收益率
+                    </div>
+                    <div class="sort-option" data-sort="max_drawdown" onclick="setSort('max_drawdown', '最大回撤')">
+                        <i class="fas fa-chart-area"></i> 最大回撤
+                    </div>
+                    <div class="sort-option" data-sort="subscribers" onclick="setSort('subscribers', '订阅人数')">
+                        <i class="fas fa-users"></i> 订阅人数
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;">
+            <!-- 搜索框 -->
+            <div class="search-box mb-3">
+                <i class="fas fa-search"></i>
+                <input type="text" class="input" placeholder="搜索策略或作者..." style="padding-left: 42px;" id="searchInput"
+                    oninput="handleSearch()">
+            </div>
+
+            <!-- 筛选标签 -->
+            <div class="filter-bar" id="filterBar">
+                <div class="filter-chip active" data-filter="all" onclick="setFilter('type', 'all')">全部</div>
+                <div class="filter-chip" data-filter="grid" onclick="setFilter('type', 'grid')"><i
+                        class="fas fa-th"></i>网格</div>
+                <div class="filter-chip" data-filter="trend" onclick="setFilter('type', 'trend')"><i
+                        class="fas fa-chart-line"></i>趋势</div>
+                <div class="filter-chip" data-filter="volatility" onclick="setFilter('type', 'volatility')"><i
+                        class="fas fa-bolt"></i>波动率</div>
+                <div class="filter-chip" data-filter="arbitrage" onclick="setFilter('type', 'arbitrage')"><i
+                        class="fas fa-exchange-alt"></i>套利</div>
+                <div class="filter-chip" data-filter="dca" onclick="setFilter('type', 'dca')"><i
+                        class="fas fa-coins"></i>定投</div>
+            </div>
+
+            <!-- 二级筛选 -->
+            <div class="flex-between mb-3">
+                <div style="display: flex; gap: 8px;">
+                    <select class="input" style="width: auto; padding: 8px 12px; font-size: 12px;" id="riskFilter"
+                        onchange="setFilter('risk_level', this.value)">
+                        <option value="all">全部风险</option>
+                        <option value="conservative">稳健</option>
+                        <option value="balanced">平衡</option>
+                        <option value="aggressive">激进</option>
+                    </select>
+                </div>
+                <label
+                    style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+                    <input type="checkbox" id="freeOnly" onchange="setFilter('free_only', this.checked)"
+                        style="accent-color: var(--color-primary);">
+                    只看免费
+                </label>
+            </div>
+
+            <!-- 策略列表 -->
+            <div id="strategyList">
+                <!-- 动态渲染 -->
+            </div>
+
+            <!-- 底部占位 -->
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="marketplace.html" class="tab-item active">
+            <i class="fas fa-store"></i>
+            <span>市场</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+    </div>
+
+    <script>
+        let searchKeyword = '';
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            loadFilters();
+            renderStrategies();
+        });
+
+        // 加载已保存的筛选状态
+        function loadFilters() {
+            const filters = store.getFilters();
+
+            // 设置类型筛选
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === filters.type) {
+                    chip.classList.add('active');
+                }
+            });
+
+            // 设置风险筛选
+            document.getElementById('riskFilter').value = filters.risk_level || 'all';
+
+            // 设置免费筛选
+            document.getElementById('freeOnly').checked = filters.free_only || false;
+
+            // 设置排序标签
+            const sortLabels = { return_30d: '收益率', max_drawdown: '最大回撤', subscribers: '订阅人数' };
+            document.getElementById('sort-label').textContent = sortLabels[filters.sort_by] || '收益率';
+
+            document.querySelectorAll('.sort-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.sort === filters.sort_by) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        // 渲染策略列表
+        function renderStrategies() {
+            const strategies = store.getFilteredMarketplaceStrategies();
+            const container = document.getElementById('strategyList');
+
+            // 搜索过滤
+            let filtered = strategies;
+            if (searchKeyword) {
+                const keyword = searchKeyword.toLowerCase();
+                filtered = strategies.filter(s =>
+                    s.name.toLowerCase().includes(keyword) ||
+                    s.author.nickname.toLowerCase().includes(keyword)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <p>没有找到匹配的策略</p>
+            <p style="font-size: 13px; margin-top: 8px;">试试调整筛选条件</p>
+          </div>
+        `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(s => `
+        <div class="strategy-card" onclick="goToDetail('${s.id}')">
+          <div class="strategy-card-header">
+            <div class="strategy-author">
+              <img src="${s.author.avatar}" alt="${s.author.nickname}">
+              <div>
+                <div class="strategy-name">${s.name}</div>
+                <div class="author-name">
+                  ${s.author.nickname}
+                  ${s.author.verified ? '<i class="fas fa-check-circle"></i>' : ''}
+                </div>
+              </div>
+            </div>
+            <span class="strategy-tag tag-risk-${s.risk_level}">${store.getRiskLabel(s.risk_level)}</span>
+          </div>
+          
+          <div class="strategy-tags">
+            <span class="strategy-tag tag-type">${store.getTypeLabel(s.type)}</span>
+            <span style="font-size: 11px; color: var(--text-muted);">v${s.version}</span>
+          </div>
+          
+          <div class="strategy-stats">
+            <div class="stat-item">
+              <div class="value ${s.performance.backtest.return_30d >= 0 ? 'positive' : 'negative'}">
+                ${s.performance.backtest.return_30d >= 0 ? '+' : ''}${s.performance.backtest.return_30d}%
+              </div>
+              <div class="label">30天收益</div>
+            </div>
+            <div class="stat-item">
+              <div class="value negative">${s.performance.backtest.max_drawdown}%</div>
+              <div class="label">最大回撤</div>
+            </div>
+            <div class="stat-item">
+              <div class="value">${s.stats.running_users}</div>
+              <div class="label">运行中</div>
+            </div>
+          </div>
+          
+          <div class="strategy-footer">
+            <span class="pricing-badge pricing-${s.pricing.type}">
+              ${store.getPricingLabel(s.pricing)}
+            </span>
+            <div class="subscribers-count">
+              <i class="fas fa-users"></i>
+              <span>${s.stats.subscribers.toLocaleString()} 订阅</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        // 设置筛选
+        function setFilter(key, value) {
+            store.setFilters({ [key]: value });
+
+            if (key === 'type') {
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                    if (chip.dataset.filter === value) {
+                        chip.classList.add('active');
+                    }
+                });
+            }
+
+            renderStrategies();
+        }
+
+        // 切换排序菜单
+        function toggleSortMenu() {
+            document.getElementById('sortMenu').classList.toggle('show');
+        }
+
+        // 设置排序
+        function setSort(sortBy, label) {
+            store.setFilters({ sort_by: sortBy });
+            document.getElementById('sort-label').textContent = label;
+            document.querySelectorAll('.sort-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.sort === sortBy) {
+                    opt.classList.add('active');
+                }
+            });
+            document.getElementById('sortMenu').classList.remove('show');
+            renderStrategies();
+        }
+
+        // 搜索处理
+        function handleSearch() {
+            searchKeyword = document.getElementById('searchInput').value;
+            renderStrategies();
+        }
+
+        // 跳转详情页
+        function goToDetail(id) {
+            localStorage.setItem('current_marketplace_strategy', id);
+            window.location.href = 'marketplace-detail.html';
+        }
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.sort-dropdown')) {
+                document.getElementById('sortMenu').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+
+</html>

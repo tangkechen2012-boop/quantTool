@@ -4,9 +4,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QuantTool - 策略列表</title>
+    <title>QuantTool - 我的策略</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="../js/mock-data.js"></script>
+    <style>
+        .source-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .source-user {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-primary);
+        }
+
+        .source-market {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+
+        .status-running {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+        }
+
+        .status-paused {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+
+        .status-tested {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-primary);
+        }
+
+        .status-saved {
+            background: rgba(100, 116, 139, 0.15);
+            color: #64748B;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,7 +96,7 @@
 
     <!-- iOS状态栏 -->
     <div class="status-bar">
-        <span class="status-bar-time">19:47</span>
+        <span class="status-bar-time">21:46</span>
         <div class="status-bar-icons">
             <i class="fas fa-signal"></i>
             <i class="fas fa-wifi"></i>
@@ -27,210 +108,42 @@
     <div class="main-content">
         <!-- 页面头部 -->
         <div class="page-header">
-            <div class="page-title">策略库</div>
-            <button class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> 新建
-            </button>
+            <div class="page-title">我的策略</div>
+            <div class="header-actions">
+                <a href="publish-strategy.html" class="btn btn-secondary btn-sm" style="padding: 8px 12px;">
+                    <i class="fas fa-upload"></i> 发布
+                </a>
+                <button class="btn btn-primary btn-sm" style="padding: 8px 12px;">
+                    <i class="fas fa-plus"></i> 新建
+                </button>
+            </div>
         </div>
 
         <div class="page-container" style="padding-top: 0;">
             <!-- 搜索框 -->
-            <div class="search-box mb-4">
+            <div class="search-box mb-3">
                 <i class="fas fa-search"></i>
-                <input type="text" class="input" placeholder="搜索策略..." style="padding-left: 42px;">
+                <input type="text" class="input" placeholder="搜索策略..." style="padding-left: 42px;" id="searchInput"
+                    oninput="renderStrategies()">
             </div>
 
             <!-- 筛选标签 -->
-            <div class="tab-nav">
-                <div class="tab-nav-item active">全部</div>
-                <div class="tab-nav-item">运行中</div>
-                <div class="tab-nav-item">已暂停</div>
-                <div class="tab-nav-item">待启动</div>
+            <div class="filter-bar">
+                <div class="filter-chip active" data-filter="all" onclick="setFilter('all')">全部</div>
+                <div class="filter-chip" data-filter="running" onclick="setFilter('running')">运行中</div>
+                <div class="filter-chip" data-filter="paused" onclick="setFilter('paused')">已暂停</div>
+                <div class="filter-chip" data-filter="tested" onclick="setFilter('tested')">已回测</div>
+                <div class="filter-chip" data-filter="market" onclick="setFilter('market')">市场策略</div>
             </div>
 
             <!-- 策略统计 -->
-            <div class="grid-3 mb-4">
-                <div class="card" style="text-align: center; padding: 14px;">
-                    <div style="font-size: 24px; font-weight: 700; color: var(--color-primary);">12</div>
-                    <div class="text-xs text-muted">全部策略</div>
-                </div>
-                <div class="card" style="text-align: center; padding: 14px;">
-                    <div style="font-size: 24px; font-weight: 700; color: var(--color-success);">5</div>
-                    <div class="text-xs text-muted">运行中</div>
-                </div>
-                <div class="card" style="text-align: center; padding: 14px;">
-                    <div style="font-size: 24px; font-weight: 700; color: var(--color-warning);">3</div>
-                    <div class="text-xs text-muted">待启动</div>
-                </div>
+            <div class="grid-3 mb-4" id="statsCards">
+                <!-- 动态渲染 -->
             </div>
 
             <!-- 策略列表 -->
-            <div class="card">
-                <div class="card-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="list-icon"
-                            style="background: rgba(99, 102, 241, 0.15); color: var(--color-primary);">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div>
-                            <div class="card-title">网格交易策略</div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">BTC/USDT · 现货</div>
-                        </div>
-                    </div>
-                    <span class="card-badge badge-success">运行中</span>
-                </div>
-                <div class="flex-between" style="padding-top: 8px;">
-                    <div>
-                        <div class="stat-value positive" style="font-size: 20px;">+28.56%</div>
-                        <div class="stat-label">累计收益</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 500;">32 天</div>
-                        <div class="stat-label">运行时间</div>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-3">
-                    <button class="btn btn-outline btn-sm" style="flex: 1;">
-                        <i class="fas fa-chart-line"></i> 查看
-                    </button>
-                    <button class="btn btn-secondary btn-sm" style="flex: 1;">
-                        <i class="fas fa-pause"></i> 暂停
-                    </button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="list-icon"
-                            style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <div>
-                            <div class="card-title">动量追踪策略</div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">ETH/USDT · 现货</div>
-                        </div>
-                    </div>
-                    <span class="card-badge badge-success">运行中</span>
-                </div>
-                <div class="flex-between" style="padding-top: 8px;">
-                    <div>
-                        <div class="stat-value positive" style="font-size: 20px;">+15.23%</div>
-                        <div class="stat-label">累计收益</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 500;">18 天</div>
-                        <div class="stat-label">运行时间</div>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-3">
-                    <button class="btn btn-outline btn-sm" style="flex: 1;">
-                        <i class="fas fa-chart-line"></i> 查看
-                    </button>
-                    <button class="btn btn-secondary btn-sm" style="flex: 1;">
-                        <i class="fas fa-pause"></i> 暂停
-                    </button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="list-icon"
-                            style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
-                            <i class="fas fa-arrows-alt-h"></i>
-                        </div>
-                        <div>
-                            <div class="card-title">均值回归策略</div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">SOL/USDT · 合约</div>
-                        </div>
-                    </div>
-                    <span class="card-badge badge-warning">待启动</span>
-                </div>
-                <div class="flex-between" style="padding-top: 8px;">
-                    <div>
-                        <div style="font-size: 20px; font-weight: 600; color: var(--text-muted);">--</div>
-                        <div class="stat-label">累计收益</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 500; color: var(--text-muted);">未启动</div>
-                        <div class="stat-label">运行时间</div>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-3">
-                    <button class="btn btn-outline btn-sm" style="flex: 1;">
-                        <i class="fas fa-history"></i> 回测
-                    </button>
-                    <button class="btn btn-success btn-sm" style="flex: 1;">
-                        <i class="fas fa-play"></i> 启动
-                    </button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="list-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger);">
-                            <i class="fas fa-code-branch"></i>
-                        </div>
-                        <div>
-                            <div class="card-title">MACD交叉策略</div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">BNB/USDT · 现货</div>
-                        </div>
-                    </div>
-                    <span class="card-badge badge-danger">已暂停</span>
-                </div>
-                <div class="flex-between" style="padding-top: 8px;">
-                    <div>
-                        <div class="stat-value negative" style="font-size: 20px;">-5.67%</div>
-                        <div class="stat-label">累计收益</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 500;">45 天</div>
-                        <div class="stat-label">运行时间</div>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-3">
-                    <button class="btn btn-outline btn-sm" style="flex: 1;">
-                        <i class="fas fa-chart-line"></i> 查看
-                    </button>
-                    <button class="btn btn-success btn-sm" style="flex: 1;">
-                        <i class="fas fa-play"></i> 恢复
-                    </button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="list-icon" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <div>
-                            <div class="card-title">AI智能策略 #1</div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">多币种 · 现货</div>
-                        </div>
-                    </div>
-                    <span class="card-badge badge-success">运行中</span>
-                </div>
-                <div class="flex-between" style="padding-top: 8px;">
-                    <div>
-                        <div class="stat-value positive" style="font-size: 20px;">+42.18%</div>
-                        <div class="stat-label">累计收益</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 500;">67 天</div>
-                        <div class="stat-label">运行时间</div>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-3">
-                    <button class="btn btn-outline btn-sm" style="flex: 1;">
-                        <i class="fas fa-chart-line"></i> 查看
-                    </button>
-                    <button class="btn btn-secondary btn-sm" style="flex: 1;">
-                        <i class="fas fa-pause"></i> 暂停
-                    </button>
-                </div>
+            <div id="strategyList">
+                <!-- 动态渲染 -->
             </div>
 
             <!-- 底部占位 -->
@@ -248,6 +161,10 @@
             <i class="fas fa-cube"></i>
             <span>策略</span>
         </a>
+        <a href="marketplace.html" class="tab-item">
+            <i class="fas fa-store"></i>
+            <span>市场</span>
+        </a>
         <a href="ai-strategy.html" class="tab-item">
             <i class="fas fa-robot"></i>
             <span>AI</span>
@@ -256,11 +173,209 @@
             <i class="fas fa-wallet"></i>
             <span>账户</span>
         </a>
-        <a href="profile.html" class="tab-item">
-            <i class="fas fa-user"></i>
-            <span>我的</span>
-        </a>
     </div>
+
+    <script>
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            renderStats();
+            renderStrategies();
+        });
+
+        function renderStats() {
+            const strategies = store.getMyStrategies();
+            const total = strategies.length;
+            const running = strategies.filter(s => s.status === 'running').length;
+            const market = strategies.filter(s => s.source === 'market').length;
+
+            document.getElementById('statsCards').innerHTML = `
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 24px; font-weight: 700; color: var(--color-primary);">${total}</div>
+          <div class="text-xs text-muted">全部策略</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 24px; font-weight: 700; color: var(--color-success);">${running}</div>
+          <div class="text-xs text-muted">运行中</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 14px;">
+          <div style="font-size: 24px; font-weight: 700; color: var(--color-warning);">${market}</div>
+          <div class="text-xs text-muted">市场策略</div>
+        </div>
+      `;
+        }
+
+        function renderStrategies() {
+            let strategies = store.getMyStrategies();
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase();
+
+            // 筛选
+            if (currentFilter === 'market') {
+                strategies = strategies.filter(s => s.source === 'market');
+            } else if (currentFilter !== 'all') {
+                strategies = strategies.filter(s => s.status === currentFilter);
+            }
+
+            // 搜索
+            if (searchKeyword) {
+                strategies = strategies.filter(s => s.name.toLowerCase().includes(searchKeyword));
+            }
+
+            const statusLabels = {
+                draft: '草稿', saved: '已保存', tested: '已回测',
+                running: '运行中', paused: '已暂停', error: '异常'
+            };
+
+            const typeIcons = {
+                grid: 'fa-th', trend: 'fa-chart-line', volatility: 'fa-bolt',
+                arbitrage: 'fa-exchange-alt', dca: 'fa-coins'
+            };
+
+            const container = document.getElementById('strategyList');
+
+            if (strategies.length === 0) {
+                container.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+            <p>没有找到策略</p>
+          </div>
+        `;
+                return;
+            }
+
+            container.innerHTML = strategies.map(s => `
+        <div class="card">
+          <div class="card-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="list-icon" style="background: ${getTypeColor(s.type)}15; color: ${getTypeColor(s.type)};">
+                <i class="fas ${typeIcons[s.type] || 'fa-cube'}"></i>
+              </div>
+              <div>
+                <div class="card-title">${s.name}</div>
+                <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                  <span style="font-size: 12px; color: var(--text-secondary);">${s.supported_pairs.join(', ')}</span>
+                  <span class="source-badge source-${s.source}">
+                    <i class="fas ${s.source === 'market' ? 'fa-store' : 'fa-user'}"></i>
+                    ${s.source === 'market' ? '市场' : '自建'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <span class="card-badge status-${s.status}">${statusLabels[s.status]}</span>
+          </div>
+          <div class="flex-between" style="padding-top: 8px;">
+            <div>
+              <div class="stat-value ${s.performance.return_total >= 0 ? 'positive' : 'negative'}" style="font-size: 20px;">
+                ${s.performance.return_total >= 0 ? '+' : ''}${s.performance.return_total}%
+              </div>
+              <div class="stat-label">累计收益</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 500;">${s.running_days} 天</div>
+              <div class="stat-label">运行时间</div>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-3">
+            ${getActionButtons(s)}
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function getTypeColor(type) {
+            const colors = {
+                grid: '#6366F1', trend: '#22C55E', volatility: '#F59E0B',
+                arbitrage: '#3B82F6', dca: '#8B5CF6'
+            };
+            return colors[type] || '#6366F1';
+        }
+
+        function getActionButtons(strategy) {
+            if (strategy.status === 'running') {
+                return `
+          <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
+            <i class="fas fa-chart-line"></i> 查看
+          </button>
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
+            <i class="fas fa-history"></i> 回测
+          </button>
+          <button class="btn btn-warning btn-sm" style="flex: 1;" onclick="pauseStrategy('${strategy.id}')">
+            <i class="fas fa-pause"></i> 暂停
+          </button>
+        `;
+            } else if (strategy.status === 'paused') {
+                return `
+          <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
+            <i class="fas fa-chart-line"></i> 查看
+          </button>
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
+            <i class="fas fa-history"></i> 回测
+          </button>
+          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="runStrategy('${strategy.id}')">
+            <i class="fas fa-play"></i> 恢复
+          </button>
+        `;
+            } else if (strategy.status === 'tested') {
+                return `
+          <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
+            <i class="fas fa-history"></i> 回测
+          </button>
+          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="runStrategy('${strategy.id}')">
+            <i class="fas fa-play"></i> 启动
+          </button>
+        `;
+            } else if (strategy.status === 'saved') {
+                return `
+          <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
+            <i class="fas fa-history"></i> 回测
+          </button>
+          <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="runStrategy('${strategy.id}')">
+            <i class="fas fa-rocket"></i> 运行
+          </button>
+        `;
+            }
+            return `
+        <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
+          <i class="fas fa-eye"></i> 查看
+        </button>
+        <button class="btn btn-secondary btn-sm" style="flex: 1;">
+          <i class="fas fa-edit"></i> 编辑
+        </button>
+      `;
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.filter === filter);
+            });
+            renderStrategies();
+        }
+
+        function viewStrategy(id) {
+            localStorage.setItem('current_my_strategy', id);
+            window.location.href = 'strategy-detail.html';
+        }
+
+        function runStrategy(id) {
+            store.updateMyStrategy(id, { status: 'running', running_days: 0 });
+            showToast('策略已开始运行', 'success');
+            renderStats();
+            renderStrategies();
+        }
+
+        function pauseStrategy(id) {
+            store.updateMyStrategy(id, { status: 'paused' });
+            showToast('策略已暂停', 'info');
+            renderStats();
+            renderStrategies();
+        }
+
+        function backtestStrategy(id) {
+            localStorage.setItem('current_strategy_id', id);
+            window.location.href = 'backtest-setup.html';
+        }
+    </script>
 </body>
 
 </html>
