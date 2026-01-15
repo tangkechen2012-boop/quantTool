@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 账户管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">19:47</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="page-title">账户管理</div>
+            <button class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> 添加
+            </button>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;">
+            <!-- 资产总览 -->
+            <div class="card"
+                style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border: 1px solid rgba(99, 102, 241, 0.3);">
+                <div style="text-align: center; padding: 8px 0;">
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">总资产估值 (USDT)</div>
+                    <div style="font-size: 36px; font-weight: 700;">$256,789.45</div>
+                    <div style="display: flex; justify-content: center; gap: 24px; margin-top: 16px;">
+                        <div>
+                            <div style="font-size: 18px; font-weight: 600; color: var(--color-success);">+$12,345.67
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted);">今日盈亏</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 600; color: var(--color-success);">+5.05%</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">收益率</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已绑定账户 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">已绑定账户</span>
+                <span class="text-sm text-muted">3 个账户</span>
+            </div>
+
+            <!-- OKX账户 -->
+            <div class="card">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div
+                            style="width: 48px; height: 48px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img src="https://www.okx.com/cdn/assets/imgs/221/65154AC2C26E0B19.png" alt="OKX"
+                                style="width: 32px; height: 32px;">
+                        </div>
+                        <div>
+                            <div class="card-title">OKX 交易所</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">主账户 · 现货 & 合约</div>
+                        </div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div style="background: var(--bg-input); border-radius: 12px; padding: 14px; margin-top: 12px;">
+                    <div class="flex-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">账户余额</span>
+                        <span style="font-weight: 600;">$128,456.78</span>
+                    </div>
+                    <div class="flex-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">运行策略</span>
+                        <span style="font-weight: 500; color: var(--color-success);">3 个运行中</span>
+                    </div>
+                    <div class="flex-between">
+                        <span style="font-size: 13px; color: var(--text-muted);">今日收益</span>
+                        <span style="font-weight: 600; color: var(--color-success);">+$1,234.56 (+0.97%)</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button class="btn btn-outline btn-sm" style="flex: 1;">
+                        <i class="fas fa-chart-bar"></i> 详情
+                    </button>
+                    <button class="btn btn-secondary btn-sm" style="flex: 1;">
+                        <i class="fas fa-cog"></i> 设置
+                    </button>
+                </div>
+            </div>
+
+            <!-- Binance账户 -->
+            <div class="card">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div
+                            style="width: 48px; height: 48px; background: #F3BA2F; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png" alt="Binance"
+                                style="width: 28px; height: 28px;">
+                        </div>
+                        <div>
+                            <div class="card-title">Binance 币安</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">现货账户</div>
+                        </div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div style="background: var(--bg-input); border-radius: 12px; padding: 14px; margin-top: 12px;">
+                    <div class="flex-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">账户余额</span>
+                        <span style="font-weight: 600;">$98,234.12</span>
+                    </div>
+                    <div class="flex-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">运行策略</span>
+                        <span style="font-weight: 500; color: var(--color-success);">2 个运行中</span>
+                    </div>
+                    <div class="flex-between">
+                        <span style="font-size: 13px; color: var(--text-muted);">今日收益</span>
+                        <span style="font-weight: 600; color: var(--color-success);">+$876.54 (+0.90%)</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button class="btn btn-outline btn-sm" style="flex: 1;">
+                        <i class="fas fa-chart-bar"></i> 详情
+                    </button>
+                    <button class="btn btn-secondary btn-sm" style="flex: 1;">
+                        <i class="fas fa-cog"></i> 设置
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bybit账户 -->
+            <div class="card">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div
+                            style="width: 48px; height: 48px; background: #F7A600; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-weight: 700; color: #000; font-size: 14px;">Bybit</span>
+                        </div>
+                        <div>
+                            <div class="card-title">Bybit</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">合约账户</div>
+                        </div>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+                <div style="background: var(--bg-input); border-radius: 12px; padding: 14px; margin-top: 12px;">
+                    <div class="flex-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">账户余额</span>
+                        <span style="font-weight: 600;">$30,098.55</span>
+                    </div>
+                    <div class="flex-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">运行策略</span>
+                        <span style="font-weight: 500; color: var(--text-muted);">已暂停</span>
+                    </div>
+                    <div class="flex-between">
+                        <span style="font-size: 13px; color: var(--text-muted);">今日收益</span>
+                        <span style="font-weight: 600; color: var(--text-muted);">$0.00</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button class="btn btn-outline btn-sm" style="flex: 1;">
+                        <i class="fas fa-chart-bar"></i> 详情
+                    </button>
+                    <button class="btn btn-success btn-sm" style="flex: 1;">
+                        <i class="fas fa-play"></i> 启用
+                    </button>
+                </div>
+            </div>
+
+            <!-- 添加新账户 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">支持的交易所</span>
+            </div>
+
+            <div class="card" style="border-style: dashed;">
+                <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; padding: 8px;">
+                    <div style="text-align: center; width: 60px;">
+                        <div
+                            style="width: 48px; height: 48px; background: var(--bg-input); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; border: 1px solid var(--border-color);">
+                            <i class="fab fa-bitcoin" style="font-size: 24px; color: #F7931A;"></i>
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-muted);">Coinbase</span>
+                    </div>
+                    <div style="text-align: center; width: 60px;">
+                        <div
+                            style="width: 48px; height: 48px; background: var(--bg-input); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; border: 1px solid var(--border-color);">
+                            <span style="font-weight: 700; color: #00C853; font-size: 12px;">KuCoin</span>
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-muted);">KuCoin</span>
+                    </div>
+                    <div style="text-align: center; width: 60px;">
+                        <div
+                            style="width: 48px; height: 48px; background: var(--bg-input); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; border: 1px solid var(--border-color);">
+                            <span style="font-weight: 700; color: #2B71FF; font-size: 12px;">Gate</span>
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-muted);">Gate.io</span>
+                    </div>
+                    <div style="text-align: center; width: 60px;">
+                        <div
+                            style="width: 48px; height: 48px; background: var(--bg-input); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; border: 1px solid var(--border-color);">
+                            <i class="fas fa-plus" style="font-size: 20px; color: var(--color-primary);"></i>
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-muted);">更多</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API密钥安全提示 -->
+            <div class="card mt-4" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3);">
+                <div style="display: flex; gap: 12px;">
+                    <div
+                        style="width: 40px; height: 40px; background: var(--color-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-shield-alt" style="color: white;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">API 密钥安全</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">
+                            您的 API 密钥采用 AES-256 加密存储，仅支持只读和交易权限，不支持提现。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部占位 -->
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item active">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+        <a href="profile.html" class="tab-item">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+
+</html>

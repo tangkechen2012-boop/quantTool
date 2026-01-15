@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 系统设置</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">19:47</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="profile.html" style="color: var(--text-primary); font-size: 20px;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;">系统设置</span>
+            </div>
+            <div></div>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;">
+            <!-- 通用设置 -->
+            <div class="flex-between mb-3">
+                <span class="font-bold">通用</span>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--color-primary);">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">深色模式</div>
+                        <div class="list-subtitle">当前已开启</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">语言</div>
+                        <div class="list-subtitle">简体中文</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">货币单位</div>
+                        <div class="list-subtitle">USDT</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--color-info);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">时区</div>
+                        <div class="list-subtitle">UTC+8 北京时间</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+            </div>
+
+            <!-- 通知设置 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">通知</span>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger);">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">推送通知</div>
+                        <div class="list-subtitle">接收策略执行和市场提醒</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--color-primary);">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">交易通知</div>
+                        <div class="list-subtitle">每笔交易实时提醒</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">收益日报</div>
+                        <div class="list-subtitle">每日收益汇总推送</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">风险预警</div>
+                        <div class="list-subtitle">止损止盈触发提醒</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+            </div>
+
+            <!-- 安全设置 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">安全</span>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">生物识别</div>
+                        <div class="list-subtitle">使用 Face ID 解锁</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--color-info);">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">修改密码</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">双重认证</div>
+                        <div class="list-subtitle">已开启 Google Authenticator</div>
+                    </div>
+                    <span class="card-badge badge-success" style="font-size: 10px;">已启用</span>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger);">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">登录记录</div>
+                        <div class="list-subtitle">查看登录设备和历史</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+            </div>
+
+            <!-- 数据与存储 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">数据与存储</span>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--color-info);">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">iCloud 同步</div>
+                        <div class="list-subtitle">策略和设置云端备份</div>
+                    </div>
+                    <div class="toggle active"></div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(100, 116, 139, 0.15); color: var(--text-muted);">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">缓存大小</div>
+                        <div class="list-subtitle">128.5 MB</div>
+                    </div>
+                    <button
+                        style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 8px; color: var(--color-danger); font-size: 12px; cursor: pointer;">
+                        清除
+                    </button>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">导出数据</div>
+                        <div class="list-subtitle">导出交易记录和策略</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+            </div>
+
+            <!-- 关于 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">关于</span>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--color-primary);">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">版本信息</div>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 14px;">v2.1.0</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">给我们评分</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--color-info);">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">用户协议</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">隐私政策</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </div>
+            </div>
+
+            <!-- 底部占位 -->
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+        <a href="profile.html" class="tab-item active">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+
+</html>

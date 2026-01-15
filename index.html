@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantTool - 量化交易平台高保真原型</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+            min-height: 100vh;
+            color: #F8FAFC;
+        }
+
+        /* 页面头部 */
+        .header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #94A3B8;
+            margin-bottom: 24px;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 24px;
+            font-size: 13px;
+            color: #A5B4FC;
+        }
+
+        .badge i {
+            font-size: 12px;
+        }
+
+        /* 设备展示网格 */
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 40px;
+            padding: 20px 40px 60px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        /* 单个设备容器 */
+        .device-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .device-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 24px;
+            border: 1px solid #334155;
+        }
+
+        .device-label-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+        }
+
+        .device-label-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #F8FAFC;
+        }
+
+        .device-label-subtitle {
+            font-size: 11px;
+            color: #64748B;
+            margin-left: 8px;
+        }
+
+        /* iPhone设备框架 */
+        .iphone-frame {
+            width: 393px;
+            height: 852px;
+            background: #000;
+            border-radius: 54px;
+            padding: 10px;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(99, 102, 241, 0.15);
+            position: relative;
+        }
+
+        .iphone-frame::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .iphone-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 44px;
+            overflow: hidden;
+            background: #0F172A;
+        }
+
+        .iphone-screen iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748B;
+            font-size: 13px;
+            border-top: 1px solid #334155;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .footer-links a {
+            color: #94A3B8;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #6366F1;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 900px) {
+            .devices-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .iphone-frame {
+                transform: scale(0.85);
+                transform-origin: top center;
+            }
+
+            .header {
+                padding: 30px 20px 20px;
+            }
+
+            .logo-text {
+                font-size: 26px;
+            }
+        }
+
+        /* 页面导航 */
+        .page-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 20px 30px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-nav-item {
+            padding: 10px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: #94A3B8;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .page-nav-item:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: #A5B4FC;
+        }
+
+        .page-nav-item i {
+            margin-right: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 页面头部 -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <span class="logo-text">QuantTool</span>
+        </div>
+        <p class="subtitle">智能量化交易平台 · 高保真原型设计</p>
+        <div class="badges">
+            <span class="badge"><i class="fas fa-mobile-alt"></i> iPhone 17 Pro 模拟</span>
+            <span class="badge"><i class="fas fa-palette"></i> iOS 设计规范</span>
+            <span class="badge"><i class="fas fa-layer-group"></i> 8 个核心界面</span>
+            <span class="badge"><i class="fas fa-code"></i> 可直接开发</span>
+        </div>
+    </header>
+
+    <!-- 页面快捷导航 -->
+    <nav class="page-nav">
+        <a class="page-nav-item" href="#home"><i class="fas fa-home"></i>首页</a>
+        <a class="page-nav-item" href="#strategies"><i class="fas fa-cube"></i>策略列表</a>
+        <a class="page-nav-item" href="#strategy-detail"><i class="fas fa-bolt"></i>策略详情</a>
+        <a class="page-nav-item" href="#performance"><i class="fas fa-chart-area"></i>表现分析</a>
+        <a class="page-nav-item" href="#ai-strategy"><i class="fas fa-robot"></i>AI策略</a>
+        <a class="page-nav-item" href="#accounts"><i class="fas fa-wallet"></i>账户管理</a>
+        <a class="page-nav-item" href="#profile"><i class="fas fa-user"></i>个人资料</a>
+        <a class="page-nav-item" href="#settings"><i class="fas fa-cog"></i>系统设置</a>
+    </nav>
+
+    <!-- 设备展示网格 -->
+    <main class="devices-grid">
+        <!-- 首页 -->
+        <div class="device-container" id="home">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-home"></i></div>
+                <span class="device-label-text">首页仪表盘</span>
+                <span class="device-label-subtitle">home.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/home.html" title="首页"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 策略列表 -->
+        <div class="device-container" id="strategies">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-cube"></i></div>
+                <span class="device-label-text">策略列表</span>
+                <span class="device-label-subtitle">strategies.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/strategies.html" title="策略列表"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 策略详情 -->
+        <div class="device-container" id="strategy-detail">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-bolt"></i></div>
+                <span class="device-label-text">策略详情</span>
+                <span class="device-label-subtitle">strategy-detail.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/strategy-detail.html" title="策略详情"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表现分析 -->
+        <div class="device-container" id="performance">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-chart-area"></i></div>
+                <span class="device-label-text">策略表现分析</span>
+                <span class="device-label-subtitle">performance.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/performance.html" title="表现分析"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI策略生成 -->
+        <div class="device-container" id="ai-strategy">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-robot"></i></div>
+                <span class="device-label-text">AI策略生成</span>
+                <span class="device-label-subtitle">ai-strategy.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/ai-strategy.html" title="AI策略生成"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 账户管理 -->
+        <div class="device-container" id="accounts">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-wallet"></i></div>
+                <span class="device-label-text">账户管理</span>
+                <span class="device-label-subtitle">accounts.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/accounts.html" title="账户管理"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人资料 -->
+        <div class="device-container" id="profile">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-user"></i></div>
+                <span class="device-label-text">个人资料</span>
+                <span class="device-label-subtitle">profile.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/profile.html" title="个人资料"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统设置 -->
+        <div class="device-container" id="settings">
+            <div class="device-label">
+                <div class="device-label-icon"><i class="fas fa-cog"></i></div>
+                <span class="device-label-text">系统设置</span>
+                <span class="device-label-subtitle">settings.html</span>
+            </div>
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <iframe src="pages/settings.html" title="系统设置"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#"><i class="fab fa-github"></i> GitHub</a>
+            <a href="#"><i class="fas fa-book"></i> 文档</a>
+            <a href="#"><i class="fas fa-envelope"></i> 联系我们</a>
+        </div>
+        <p>QuantTool 高保真原型 · 基于 HTML + CSS 构建 · 可直接用于开发</p>
+        <p style="margin-top: 8px;">© 2024 QuantTool. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('.page-nav-item').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

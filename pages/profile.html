@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 个人资料</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">19:47</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 用户信息头部 -->
+        <div
+            style="padding: 24px 20px; text-align: center; background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);">
+            <div
+                style="width: 88px; height: 88px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary) 0%, #8B5CF6 100%); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face"
+                    alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+            </div>
+            <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">Alex Chen</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">@alexchen_quant</div>
+            <div style="display: flex; justify-content: center; gap: 8px;">
+                <span class="card-badge badge-primary">
+                    <i class="fas fa-crown" style="font-size: 10px;"></i> Pro 会员
+                </span>
+                <span class="card-badge badge-success">
+                    <i class="fas fa-check-circle" style="font-size: 10px;"></i> 已认证
+                </span>
+            </div>
+        </div>
+
+        <!-- 统计数据 -->
+        <div class="page-container" style="padding-top: 0;">
+            <div class="grid-3 mb-4">
+                <div class="card" style="text-align: center; padding: 14px;">
+                    <div style="font-size: 22px; font-weight: 700;">186</div>
+                    <div class="text-xs text-muted">交易天数</div>
+                </div>
+                <div class="card" style="text-align: center; padding: 14px;">
+                    <div style="font-size: 22px; font-weight: 700; color: var(--color-success);">+128%</div>
+                    <div class="text-xs text-muted">总收益率</div>
+                </div>
+                <div class="card" style="text-align: center; padding: 14px;">
+                    <div style="font-size: 22px; font-weight: 700;">12</div>
+                    <div class="text-xs text-muted">策略数</div>
+                </div>
+            </div>
+
+            <!-- 菜单列表 -->
+            <div class="card">
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div class="list-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--color-primary);">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">编辑资料</div>
+                        <div class="list-subtitle">修改头像、昵称等信息</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">我的业绩</div>
+                        <div class="list-subtitle">交易记录与收益统计</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div class="list-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">收藏策略</div>
+                        <div class="list-subtitle">已收藏 8 个策略</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit; border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">分享策略</div>
+                        <div class="list-subtitle">已分享 3 个策略</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+            </div>
+
+            <!-- 设置菜单 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">设置</span>
+            </div>
+
+            <div class="card">
+                <a href="settings.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div class="list-icon" style="background: rgba(100, 116, 139, 0.15); color: var(--text-muted);">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">系统设置</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div class="list-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--color-info);">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">通知设置</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div class="list-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger);">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">安全设置</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+                <a href="#" class="list-item" style="text-decoration: none; color: inherit; border-bottom: none;">
+                    <div class="list-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--color-success);">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">帮助与反馈</div>
+                    </div>
+                    <i class="fas fa-chevron-right list-action"></i>
+                </a>
+            </div>
+
+            <!-- 会员卡片 -->
+            <div class="card mt-4"
+                style="background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A855F7 100%); border: none;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div
+                        style="width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-crown" style="font-size: 24px; color: #FFD700;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 18px; font-weight: 700; color: white;">Pro 会员</div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.7);">有效期至 2025-12-31</div>
+                    </div>
+                    <button
+                        style="background: rgba(255,255,255,0.2); border: none; padding: 10px 16px; border-radius: 20px; color: white; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        续费
+                    </button>
+                </div>
+                <div
+                    style="display: flex; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7);">AI策略次数</div>
+                        <div style="font-size: 15px; font-weight: 600; color: white;">无限</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7);">策略数量</div>
+                        <div style="font-size: 15px; font-weight: 600; color: white;">无限</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7);">账户数量</div>
+                        <div style="font-size: 15px; font-weight: 600; color: white;">10个</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 退出登录 -->
+            <button class="btn btn-secondary btn-block mt-4" style="color: var(--color-danger);">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+
+            <!-- 版本信息 -->
+            <div style="text-align: center; padding: 20px 0; color: var(--text-muted); font-size: 12px;">
+                QuantTool v2.1.0<br>
+                © 2024 QuantTool. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+        <a href="profile.html" class="tab-item active">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 策略表现</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">19:47</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="strategy-detail.html" style="color: var(--text-primary); font-size: 20px;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;">策略表现分析</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="padding: 8px; border-radius: 8px;">
+                <i class="fas fa-share-alt"></i>
+            </button>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;">
+            <!-- 时间范围选择 -->
+            <div class="tab-nav mb-4">
+                <div class="tab-nav-item">7天</div>
+                <div class="tab-nav-item">30天</div>
+                <div class="tab-nav-item">90天</div>
+                <div class="tab-nav-item active">1年</div>
+                <div class="tab-nav-item">全部</div>
+            </div>
+
+            <!-- 收益概览 -->
+            <div class="card"
+                style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%); border-color: rgba(34, 197, 94, 0.3);">
+                <div style="text-align: center;">
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">年度累计收益率</div>
+                    <div style="font-size: 48px; font-weight: 700; color: var(--color-success);">+128.56%</div>
+                    <div style="font-size: 14px; color: var(--color-success); margin-top: 8px;">
+                        <i class="fas fa-arrow-up"></i> 超越市场基准 +85.23%
+                    </div>
+                </div>
+            </div>
+
+            <!-- 年度收益曲线 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">年度收益曲线</span>
+            </div>
+
+            <div class="chart-container" style="padding: 16px;">
+                <canvas id="yearlyChart" height="220"></canvas>
+            </div>
+
+            <!-- 关键指标 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">关键指标</span>
+            </div>
+
+            <div class="grid-2 mb-3">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 700; color: var(--color-success);">72.5%</div>
+                    <div class="text-sm text-muted mt-2">胜率</div>
+                    <div class="progress-bar mt-3">
+                        <div class="progress-fill success" style="width: 72.5%;"></div>
+                    </div>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 700; color: var(--color-primary);">2.34</div>
+                    <div class="text-sm text-muted mt-2">夏普比率</div>
+                    <div class="progress-bar mt-3">
+                        <div class="progress-fill primary" style="width: 78%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2 mb-3">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 700; color: var(--color-danger);">-12.8%</div>
+                    <div class="text-sm text-muted mt-2">最大回撤</div>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 700;">3.21</div>
+                    <div class="text-sm text-muted mt-2">盈亏比</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 700;">1,456</div>
+                    <div class="text-sm text-muted mt-2">总交易次数</div>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 28px; font-weight: 700;">$23.45</div>
+                    <div class="text-sm text-muted mt-2">平均收益</div>
+                </div>
+            </div>
+
+            <!-- 月度收益分布 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">月度收益分布</span>
+            </div>
+
+            <div class="chart-container" style="padding: 16px;">
+                <canvas id="monthlyChart" height="180"></canvas>
+            </div>
+
+            <!-- 收益分布热力图 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">日收益热力图</span>
+            </div>
+
+            <div class="card">
+                <div
+                    style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 10px; text-align: center; margin-bottom: 8px; color: var(--text-muted);">
+                    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                    <!-- 日收益热力图单元格 -->
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.2); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.6); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.3); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(239, 68, 68, 0.3); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.8); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.4); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.2); border-radius: 4px;"></div>
+
+                    <div style="aspect-ratio: 1; background: rgba(239, 68, 68, 0.2); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.5); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.7); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.9); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.3); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(239, 68, 68, 0.4); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.2); border-radius: 4px;"></div>
+
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.6); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.4); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(239, 68, 68, 0.5); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.3); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.8); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.5); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.7); border-radius: 4px;"></div>
+
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.4); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(239, 68, 68, 0.3); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.6); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.9); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.5); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(34, 197, 94, 0.3); border-radius: 4px;"></div>
+                    <div style="aspect-ratio: 1; background: rgba(239, 68, 68, 0.2); border-radius: 4px;"></div>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 11px; color: var(--text-muted);">
+                    <span>亏损</span>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <div style="width: 16px; height: 8px; background: rgba(239, 68, 68, 0.5); border-radius: 2px;">
+                        </div>
+                        <div style="width: 16px; height: 8px; background: rgba(239, 68, 68, 0.2); border-radius: 2px;">
+                        </div>
+                        <div style="width: 16px; height: 8px; background: rgba(51, 65, 85, 0.5); border-radius: 2px;">
+                        </div>
+                        <div style="width: 16px; height: 8px; background: rgba(34, 197, 94, 0.3); border-radius: 2px;">
+                        </div>
+                        <div style="width: 16px; height: 8px; background: rgba(34, 197, 94, 0.6); border-radius: 2px;">
+                        </div>
+                        <div style="width: 16px; height: 8px; background: rgba(34, 197, 94, 0.9); border-radius: 2px;">
+                        </div>
+                    </div>
+                    <span>盈利</span>
+                </div>
+            </div>
+
+            <!-- 与基准对比 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">与基准对比</span>
+            </div>
+
+            <div class="chart-container" style="padding: 16px;">
+                <canvas id="compareChart" height="180"></canvas>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div
+                        style="width: 12px; height: 12px; background: var(--color-primary); border-radius: 50%; margin-right: 12px;">
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">策略收益</div>
+                    </div>
+                    <div style="font-weight: 600; color: var(--color-success);">+128.56%</div>
+                </div>
+                <div class="list-item">
+                    <div
+                        style="width: 12px; height: 12px; background: #94A3B8; border-radius: 50%; margin-right: 12px;">
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">BTC 持有</div>
+                    </div>
+                    <div style="font-weight: 600; color: var(--color-success);">+43.33%</div>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div
+                        style="width: 12px; height: 12px; background: #64748B; border-radius: 50%; margin-right: 12px;">
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">ETH 持有</div>
+                    </div>
+                    <div style="font-weight: 600; color: var(--color-success);">+28.91%</div>
+                </div>
+            </div>
+
+            <!-- 底部占位 -->
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item active">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+        <a href="profile.html" class="tab-item">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <script>
+        // 年度收益曲线
+        const yearlyCtx = document.getElementById('yearlyChart').getContext('2d');
+        const yearlyGradient = yearlyCtx.createLinearGradient(0, 0, 0, 220);
+        yearlyGradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+        yearlyGradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+        new Chart(yearlyCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [{
+                    label: '收益率',
+                    data: [0, 8.5, 15.2, 28.4, 42.1, 55.8, 48.3, 72.6, 89.4, 102.5, 115.8, 128.56],
+                    borderColor: '#22C55E',
+                    backgroundColor: yearlyGradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#22C55E',
+                    pointBorderColor: '#0F172A',
+                    pointBorderWidth: 2,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748B', font: { size: 11 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                        ticks: {
+                            color: '#64748B',
+                            font: { size: 11 },
+                            callback: function (value) { return value + '%'; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 月度收益柱状图
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [{
+                    label: '月收益',
+                    data: [8.5, 6.7, 13.2, 13.7, 13.7, -7.5, 24.3, 16.8, 13.1, 13.3, 12.76, 0],
+                    backgroundColor: function (context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+                    },
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748B', font: { size: 10 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                        ticks: {
+                            color: '#64748B',
+                            font: { size: 10 },
+                            callback: function (value) { return value + '%'; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 基准对比图
+        const compareCtx = document.getElementById('compareChart').getContext('2d');
+        new Chart(compareCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [{
+                    label: '策略',
+                    data: [0, 8.5, 15.2, 28.4, 42.1, 55.8, 48.3, 72.6, 89.4, 102.5, 115.8, 128.56],
+                    borderColor: '#6366F1',
+                    backgroundColor: 'transparent',
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }, {
+                    label: 'BTC',
+                    data: [0, 5.2, 12.4, 18.6, 25.3, 32.1, 28.5, 35.2, 38.9, 41.2, 42.8, 43.33],
+                    borderColor: '#94A3B8',
+                    backgroundColor: 'transparent',
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    borderDash: [5, 5]
+                }, {
+                    label: 'ETH',
+                    data: [0, 3.8, 8.2, 12.5, 15.8, 19.2, 16.4, 21.5, 24.8, 26.5, 27.9, 28.91],
+                    borderColor: '#64748B',
+                    backgroundColor: 'transparent',
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    borderDash: [2, 2]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748B', font: { size: 10 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                        ticks: {
+                            color: '#64748B',
+                            font: { size: 10 },
+                            callback: function (value) { return value + '%'; }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

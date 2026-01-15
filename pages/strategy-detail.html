@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 策略详情</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">19:47</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="strategies.html" style="color: var(--text-primary); font-size: 20px;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;">策略详情</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="padding: 8px; border-radius: 8px;">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+        </div>
+
+        <div class="page-container" style="padding-top: 0;">
+            <!-- 策略信息卡片 -->
+            <div class="card"
+                style="background: linear-gradient(135deg, var(--color-primary) 0%, #8B5CF6 100%); border: none;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div
+                        style="width: 52px; height: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-bolt" style="font-size: 24px; color: white;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 20px; font-weight: 700; color: white;">网格交易策略</div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.7);">BTC/USDT · 现货交易</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 24px;">
+                    <div>
+                        <div style="font-size: 28px; font-weight: 700; color: white;">+28.56%</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.7);">累计收益率</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 28px; font-weight: 700; color: white;">$3,421</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.7);">收益金额</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 一键操作按钮 -->
+            <div class="grid-2 mb-4">
+                <button class="btn btn-primary btn-block" style="padding: 14px;" id="backtest-btn">
+                    <i class="fas fa-history"></i>
+                    一键回测
+                </button>
+                <button class="btn btn-success btn-block" style="padding: 14px;" id="apply-btn">
+                    <i class="fas fa-rocket"></i>
+                    应用到账户
+                </button>
+            </div>
+
+            <!-- 策略参数 -->
+            <div class="flex-between mb-3">
+                <span class="font-bold">策略参数</span>
+                <a href="#" style="color: var(--color-primary); font-size: 13px; text-decoration: none;">编辑 <i
+                        class="fas fa-pen" style="font-size: 10px;"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-content">
+                        <div class="list-title">交易对</div>
+                    </div>
+                    <div style="font-weight: 500;">BTC/USDT</div>
+                </div>
+                <div class="list-item">
+                    <div class="list-content">
+                        <div class="list-title">网格数量</div>
+                    </div>
+                    <div style="font-weight: 500;">20 格</div>
+                </div>
+                <div class="list-item">
+                    <div class="list-content">
+                        <div class="list-title">价格区间</div>
+                    </div>
+                    <div style="font-weight: 500;">$35,000 - $50,000</div>
+                </div>
+                <div class="list-item">
+                    <div class="list-content">
+                        <div class="list-title">单格投入</div>
+                    </div>
+                    <div style="font-weight: 500;">$500 USDT</div>
+                </div>
+                <div class="list-item">
+                    <div class="list-content">
+                        <div class="list-title">止损价格</div>
+                    </div>
+                    <div style="font-weight: 500;">$32,000</div>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-content">
+                        <div class="list-title">止盈价格</div>
+                    </div>
+                    <div style="font-weight: 500;">$55,000</div>
+                </div>
+            </div>
+
+            <!-- 运行统计 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">运行统计</span>
+            </div>
+
+            <div class="grid-2 mb-3">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--color-success);">72%</div>
+                    <div class="text-xs text-muted mt-2">胜率</div>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700;">156</div>
+                    <div class="text-xs text-muted mt-2">成交次数</div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700;">32天</div>
+                    <div class="text-xs text-muted mt-2">运行时间</div>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--color-primary);">1.89</div>
+                    <div class="text-xs text-muted mt-2">夏普比率</div>
+                </div>
+            </div>
+
+            <!-- 收益曲线 -->
+            <div class="flex-between mb-3 mt-4">
+                <span class="font-bold">收益曲线</span>
+                <a href="performance.html"
+                    style="color: var(--color-primary); font-size: 13px; text-decoration: none;">详情 <i
+                        class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="profitChart" height="180"></canvas>
+            </div>
+
+            <!-- 最近交易 -->
+            <div class="flex-between mb-3">
+                <span class="font-bold">最近交易</span>
+                <a href="#" style="color: var(--color-primary); font-size: 13px; text-decoration: none;">全部 <i
+                        class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="list-item">
+                    <div class="list-icon"
+                        style="background: rgba(34, 197, 94, 0.15); color: var(--color-success); width: 36px; height: 36px; font-size: 14px;">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">买入 BTC</div>
+                        <div class="list-subtitle">2024-01-15 14:32:18</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 500; color: var(--color-success);">+0.0125 BTC</div>
+                        <div class="text-xs text-muted">$43,256.78</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon"
+                        style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger); width: 36px; height: 36px; font-size: 14px;">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">卖出 BTC</div>
+                        <div class="list-subtitle">2024-01-15 12:15:42</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 500; color: var(--color-danger);">-0.0125 BTC</div>
+                        <div class="text-xs text-muted">$44,123.45</div>
+                    </div>
+                </div>
+                <div class="list-item" style="border-bottom: none;">
+                    <div class="list-icon"
+                        style="background: rgba(34, 197, 94, 0.15); color: var(--color-success); width: 36px; height: 36px; font-size: 14px;">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="list-content">
+                        <div class="list-title">买入 BTC</div>
+                        <div class="list-subtitle">2024-01-15 09:45:33</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 500; color: var(--color-success);">+0.0118 BTC</div>
+                        <div class="text-xs text-muted">$42,890.12</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部占位 -->
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item active">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+        <a href="profile.html" class="tab-item">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <script>
+        // 收益曲线图表
+        const ctx = document.getElementById('profitChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [{
+                    label: '收益率',
+                    data: [0, 3.2, 5.8, 8.1, 12.4, 15.6, 14.2, 18.9, 22.3, 25.1, 24.8, 28.56],
+                    borderColor: '#6366F1',
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#6366F1',
+                    pointHoverBorderColor: 'white',
+                    pointHoverBorderWidth: 2,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748B', font: { size: 10 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                        ticks: {
+                            color: '#64748B',
+                            font: { size: 10 },
+                            callback: function (value) { return value + '%'; }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

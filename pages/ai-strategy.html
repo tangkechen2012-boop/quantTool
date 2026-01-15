@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - AI策略生成</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .ai-gradient-bg {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A855F7 100%);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        .suggestion-chip {
+            display: inline-block;
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">19:47</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content" style="display: flex; flex-direction: column;">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div>
+                <div class="page-title" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="ai-gradient-bg"
+                        style="width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-robot" style="color: white; font-size: 16px;"></i>
+                    </span>
+                    AI 策略助手
+                </div>
+            </div>
+            <button class="btn btn-secondary btn-sm"
+                style="padding: 10px; border-radius: 50%; width: 40px; height: 40px;">
+                <i class="fas fa-history"></i>
+            </button>
+        </div>
+
+        <!-- 聊天消息区域 -->
+        <div class="chat-messages" style="flex: 1; overflow-y: auto;">
+            <!-- AI欢迎消息 -->
+            <div class="chat-message ai fade-in">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-bubble">
+                    <div style="font-weight: 600; margin-bottom: 8px;">👋 你好！我是 QuantTool AI 策略助手</div>
+                    <div>我可以帮你：</div>
+                    <ul style="margin: 8px 0; padding-left: 20px; color: var(--text-secondary);">
+                        <li>智能生成量化交易策略</li>
+                        <li>分析市场趋势和机会</li>
+                        <li>优化现有策略参数</li>
+                        <li>解释策略运行逻辑</li>
+                    </ul>
+                    <div>试试告诉我你的交易想法！</div>
+                </div>
+            </div>
+
+            <!-- 用户消息 -->
+            <div class="chat-message user fade-in" style="animation-delay: 0.1s;">
+                <div class="chat-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="chat-bubble">
+                    帮我生成一个适合BTC震荡行情的网格交易策略，资金量大概1万USDT
+                </div>
+            </div>
+
+            <!-- AI回复 -->
+            <div class="chat-message ai fade-in" style="animation-delay: 0.2s;">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-bubble">
+                    <div style="font-weight: 600; margin-bottom: 12px;">🎯 为您生成 BTC 网格策略</div>
+
+                    <div style="background: var(--bg-input); border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+                        <div style="font-weight: 600; color: var(--color-primary); margin-bottom: 10px;">
+                            <i class="fas fa-cog"></i> 策略参数
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                            <div><span style="color: var(--text-muted);">交易对：</span>BTC/USDT</div>
+                            <div><span style="color: var(--text-muted);">网格数：</span>25格</div>
+                            <div><span style="color: var(--text-muted);">价格区间：</span>$38K-$48K</div>
+                            <div><span style="color: var(--text-muted);">单格金额：</span>$400</div>
+                            <div><span style="color: var(--text-muted);">止损：</span>$35,000</div>
+                            <div><span style="color: var(--text-muted);">止盈：</span>$52,000</div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="background: rgba(34, 197, 94, 0.1); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid rgba(34, 197, 94, 0.2);">
+                        <div style="font-weight: 600; color: var(--color-success); margin-bottom: 10px;">
+                            <i class="fas fa-chart-line"></i> 历史回测 (近6个月)
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                            <div><span style="color: var(--text-muted);">预估收益：</span><span
+                                    style="color: var(--color-success);">+32.5%</span></div>
+                            <div><span style="color: var(--text-muted);">最大回撤：</span><span
+                                    style="color: var(--color-danger);">-8.2%</span></div>
+                            <div><span style="color: var(--text-muted);">胜率：</span>76.5%</div>
+                            <div><span style="color: var(--text-muted);">夏普比率：</span>1.89</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+                        📊 该策略基于近期BTC在$38K-$48K区间震荡的特点设计，适合当前市场环境。
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1;">
+                            <i class="fas fa-play"></i> 应用策略
+                        </button>
+                        <button class="btn btn-outline btn-sm" style="flex: 1;">
+                            <i class="fas fa-edit"></i> 调整参数
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户消息 -->
+            <div class="chat-message user fade-in" style="animation-delay: 0.3s;">
+                <div class="chat-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="chat-bubble">
+                    风险再低一点，可以把网格调密一些吗？
+                </div>
+            </div>
+
+            <!-- AI回复 -->
+            <div class="chat-message ai fade-in" style="animation-delay: 0.4s;">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-bubble">
+                    <div style="font-weight: 600; margin-bottom: 12px;">✅ 已为您优化策略参数</div>
+
+                    <div style="background: var(--bg-input); border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+                        <div style="font-weight: 600; color: var(--color-primary); margin-bottom: 10px;">
+                            <i class="fas fa-shield-alt"></i> 低风险优化版
+                        </div>
+                        <div style="font-size: 13px;">
+                            <div
+                                style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-muted);">网格数量</span>
+                                <span>25格 → <span style="color: var(--color-success);">40格</span></span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-muted);">价格区间</span>
+                                <span>$38K-$48K → <span style="color: var(--color-success);">$40K-$46K</span></span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-muted);">单格金额</span>
+                                <span>$400 → <span style="color: var(--color-success);">$250</span></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+                                <span style="color: var(--text-muted);">预估最大回撤</span>
+                                <span>-8.2% → <span style="color: var(--color-success);">-4.5%</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="background: rgba(99, 102, 241, 0.1); border-radius: 12px; padding: 12px; font-size: 13px; border: 1px solid rgba(99, 102, 241, 0.2);">
+                        <i class="fas fa-lightbulb" style="color: var(--color-primary);"></i>
+                        <span style="color: var(--text-secondary);"> 更密的网格可以在小幅波动中获取更多收益，同时降低单笔交易风险。</span>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-success btn-sm" style="flex: 1;">
+                            <i class="fas fa-rocket"></i> 立即启用
+                        </button>
+                        <button class="btn btn-secondary btn-sm" style="flex: 1;">
+                            <i class="fas fa-history"></i> 回测验证
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快捷建议 -->
+            <div style="padding: 16px; text-align: center;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">快捷提问</div>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                    <span class="suggestion-chip">📈 分析当前市场</span>
+                    <span class="suggestion-chip">🔄 优化现有策略</span>
+                    <span class="suggestion-chip">💡 推荐交易机会</span>
+                    <span class="suggestion-chip">📊 解释策略原理</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="chat-input-area">
+            <button
+                style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer;">
+                <i class="fas fa-plus"></i>
+            </button>
+            <input type="text" class="chat-input" placeholder="描述你的交易想法...">
+            <button class="chat-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 底部Tab Bar -->
+    <div class="tab-bar">
+        <a href="home.html" class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </a>
+        <a href="strategies.html" class="tab-item">
+            <i class="fas fa-cube"></i>
+            <span>策略</span>
+        </a>
+        <a href="ai-strategy.html" class="tab-item active">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </a>
+        <a href="accounts.html" class="tab-item">
+            <i class="fas fa-wallet"></i>
+            <span>账户</span>
+        </a>
+        <a href="profile.html" class="tab-item">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+
+</html>
