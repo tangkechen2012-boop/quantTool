@@ -223,7 +223,8 @@
 
             const statusLabels = {
                 draft: '草稿', saved: '已保存', tested: '已回测',
-                running: '运行中', paused: '已暂停', error: '异常'
+                applied: '已配置', running: '运行中', paused: '已暂停',
+                stopped: '已停止', error: '异常'
             };
 
             const typeIcons = {
@@ -243,7 +244,35 @@
                 return;
             }
 
-            container.innerHTML = strategies.map(s => `
+            container.innerHTML = strategies.map(s => {
+                // 获取应用配置信息
+                let appInfo = '';
+                if (['applied', 'running', 'paused'].includes(s.status) && s.last_application_id) {
+                    const app = store.getApplication(s.last_application_id);
+                    if (app) {
+                        const account = store.getAccount(app.account_id);
+                        appInfo = `
+                            <div style="margin-top: 10px; padding: 10px; background: rgba(99,102,241,0.1); border-radius: 10px; font-size: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="color: var(--text-muted);">账户</span>
+                                    <span style="font-weight: 500;">${account?.name || '未知'} (${account?.exchange || '-'})</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="color: var(--text-muted);">模式</span>
+                                    <span style="font-weight: 500; color: ${app.mode === 'paper' ? 'var(--color-success)' : 'var(--color-danger)'};">
+                                        ${app.mode === 'paper' ? '模拟盘' : '实盘'}
+                                    </span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted);">资金</span>
+                                    <span style="font-weight: 500;">$${app.allocated_amount.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
         <div class="card">
           <div class="card-header">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -275,11 +304,13 @@
               <div class="stat-label">运行时间</div>
             </div>
           </div>
+          ${appInfo}
           <div class="flex gap-2 mt-3">
             ${getActionButtons(s)}
           </div>
         </div>
-      `).join('');
+      `;
+            }).join('');
         }
 
         function getTypeColor(type) {
@@ -296,10 +327,10 @@
           <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
             <i class="fas fa-chart-line"></i> 查看
           </button>
-          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
-            <i class="fas fa-history"></i> 回测
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="applyStrategy('${strategy.id}')">
+            <i class="fas fa-cog"></i> 策略设置
           </button>
-          <button class="btn btn-warning btn-sm" style="flex: 1;" onclick="pauseStrategy('${strategy.id}')">
+          <button class="btn btn-warning btn-sm" style="flex: 1;" onclick="pauseRunningStrategy('${strategy.id}')">
             <i class="fas fa-pause"></i> 暂停
           </button>
         `;
@@ -308,11 +339,20 @@
           <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
             <i class="fas fa-chart-line"></i> 查看
           </button>
-          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
-            <i class="fas fa-history"></i> 回测
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="applyStrategy('${strategy.id}')">
+            <i class="fas fa-cog"></i> 策略设置
           </button>
-          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="runStrategy('${strategy.id}')">
+          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="resumeRunningStrategy('${strategy.id}')">
             <i class="fas fa-play"></i> 恢复
+          </button>
+        `;
+            } else if (strategy.status === 'applied') {
+                return `
+          <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
+            <i class="fas fa-eye"></i> 查看
+          </button>
+          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="startAppliedStrategy('${strategy.id}')">
+            <i class="fas fa-play"></i> 启动
           </button>
         `;
             } else if (strategy.status === 'tested') {
@@ -320,17 +360,17 @@
           <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
             <i class="fas fa-history"></i> 回测
           </button>
-          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="runStrategy('${strategy.id}')">
-            <i class="fas fa-play"></i> 启动
+          <button class="btn btn-success btn-sm" style="flex: 1;" onclick="applyStrategy('${strategy.id}')">
+            <i class="fas fa-cog"></i> 策略设置
           </button>
         `;
-            } else if (strategy.status === 'saved') {
+            } else if (strategy.status === 'saved' || strategy.status === 'stopped') {
                 return `
           <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
             <i class="fas fa-history"></i> 回测
           </button>
-          <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="runStrategy('${strategy.id}')">
-            <i class="fas fa-rocket"></i> 运行
+          <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="applyStrategy('${strategy.id}')">
+            <i class="fas fa-cog"></i> 策略设置
           </button>
         `;
             }
@@ -338,8 +378,8 @@
         <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="viewStrategy('${strategy.id}')">
           <i class="fas fa-eye"></i> 查看
         </button>
-        <button class="btn btn-secondary btn-sm" style="flex: 1;">
-          <i class="fas fa-edit"></i> 编辑
+        <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="backtestStrategy('${strategy.id}')">
+          <i class="fas fa-history"></i> 回测
         </button>
       `;
         }
@@ -374,6 +414,75 @@
         function backtestStrategy(id) {
             localStorage.setItem('current_strategy_id', id);
             window.location.href = 'backtest-setup.html';
+        }
+
+        function applyStrategy(id) {
+            localStorage.setItem('current_strategy_id', id);
+            window.location.href = 'strategy-apply.html';
+        }
+
+        function monitorStrategy(id) {
+            const strategy = store.getMyStrategies().find(s => s.id === id);
+            if (strategy && strategy.current_run_id) {
+                localStorage.setItem('current_run_id', strategy.current_run_id);
+                window.location.href = 'strategy-running.html';
+            }
+        }
+
+        function pauseRunningStrategy(id) {
+            const strategy = store.getMyStrategies().find(s => s.id === id);
+            if (strategy && strategy.current_run_id) {
+                const result = store.pauseStrategy(strategy.current_run_id);
+                if (result.success) {
+                    showToast('策略已暂停', 'info');
+                    renderStats();
+                    renderStrategies();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } else if (strategy) {
+                // 没有 run_id 时直接更新状态
+                store.updateMyStrategy(id, { status: 'paused' });
+                showToast('策略已暂停', 'info');
+                renderStats();
+                renderStrategies();
+            }
+        }
+
+        function resumeRunningStrategy(id) {
+            const strategy = store.getMyStrategies().find(s => s.id === id);
+            if (strategy && strategy.current_run_id) {
+                const result = store.resumeStrategy(strategy.current_run_id);
+                if (result.success) {
+                    showToast('策略已恢复运行', 'success');
+                    renderStats();
+                    renderStrategies();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } else if (strategy) {
+                // 没有 run_id 时直接更新状态
+                store.updateMyStrategy(id, { status: 'running' });
+                showToast('策略已恢复运行', 'success');
+                renderStats();
+                renderStrategies();
+            }
+        }
+
+        function startAppliedStrategy(id) {
+            const strategy = store.getMyStrategies().find(s => s.id === id);
+            if (strategy && strategy.last_application_id) {
+                const result = store.startStrategy(strategy.last_application_id);
+                if (result.success) {
+                    localStorage.setItem('current_run_id', result.runId);
+                    showToast('策略已启动', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'strategy-running.html';
+                    }, 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            }
         }
     </script>
 </body>

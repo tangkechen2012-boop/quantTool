@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=393, height=852, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantTool - 应用策略</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="../js/mock-data.js"></script>
+    <style>
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-bottom: 24px;
+        }
+
+        .wizard-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .wizard-step::after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .wizard-step:last-child::after {
+            display: none;
+        }
+
+        .step-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            z-index: 1;
+            transition: all 0.3s;
+        }
+
+        .wizard-step.active .step-circle {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        .wizard-step.completed .step-circle {
+            background: var(--color-success);
+            border-color: var(--color-success);
+            color: white;
+        }
+
+        .wizard-step.completed::after {
+            background: var(--color-success);
+        }
+
+        .step-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .wizard-step.active .step-label {
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        .wizard-content {
+            padding: 0 16px;
+        }
+
+        .wizard-panel {
+            display: none;
+        }
+
+        .wizard-panel.active {
+            display: block;
+        }
+
+        .account-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .account-card:hover {
+            border-color: var(--color-primary);
+        }
+
+        .account-card.selected {
+            border-color: var(--color-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .account-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .account-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .account-exchange {
+            padding: 4px 10px;
+            background: var(--bg-input);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .account-balance {
+            display: flex;
+            gap: 20px;
+        }
+
+        .balance-item {
+            text-align: center;
+        }
+
+        .balance-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .balance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .mode-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-card:hover {
+            border-color: var(--color-primary);
+        }
+
+        .mode-card.selected {
+            border-color: var(--color-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .mode-card.live {
+            border-color: var(--color-danger);
+        }
+
+        .mode-card.live.selected {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .mode-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .mode-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .mode-icon.paper {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--color-success);
+        }
+
+        .mode-icon.live {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        .mode-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .mode-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .live-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .live-warning.show {
+            display: block;
+        }
+
+        .live-warning-text {
+            font-size: 13px;
+            color: var(--color-danger);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .config-section {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .config-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-title i {
+            color: var(--color-primary);
+        }
+
+        .config-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .config-row:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .config-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-input input {
+            width: 80px;
+            padding: 8px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .config-input input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 28px;
+            background: var(--bg-input);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--color-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 23px;
+        }
+
+        .confirm-section {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .confirm-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .confirm-item:last-child {
+            border-bottom: none;
+        }
+
+        .confirm-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .confirm-value {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .risk-disclaimer {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .risk-disclaimer-title {
+            font-weight: 600;
+            color: var(--color-warning);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .risk-disclaimer-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 0;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--color-primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .wizard-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-wizard {
+            flex: 1;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-wizard.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-wizard.primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #8B5CF6 100%);
+            border: none;
+            color: white;
+        }
+
+        .btn-wizard:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态岛 -->
+    <div class="dynamic-island"></div>
+
+    <!-- iOS状态栏 -->
+    <div class="status-bar">
+        <span class="status-bar-time">00:39</span>
+        <div class="status-bar-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full battery"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <div class="page-header" style="padding-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="strategy-detail.html" style="color: var(--text-primary); font-size: 20px;" id="backBtn">
+                    <i class="fas fa-times"></i>
+                </a>
+                <span style="font-size: 17px; font-weight: 600;" id="strategyTitle">应用策略</span>
+            </div>
+        </div>
+
+        <!-- 进度指示器 -->
+        <div class="wizard-progress">
+            <div class="wizard-step active" data-step="1">
+                <div class="step-circle">1</div>
+                <span class="step-label">选择账户</span>
+            </div>
+            <div class="wizard-step" data-step="2">
+                <div class="step-circle">2</div>
+                <span class="step-label">资金模式</span>
+            </div>
+            <div class="wizard-step" data-step="3">
+                <div class="step-circle">3</div>
+                <span class="step-label">风控参数</span>
+            </div>
+            <div class="wizard-step" data-step="4">
+                <div class="step-circle">4</div>
+                <span class="step-label">确认应用</span>
+            </div>
+        </div>
+
+        <!-- Step 1: 选择账户 -->
+        <div class="wizard-content">
+            <div class="wizard-panel active" id="step1">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">选择交易账户</h3>
+                <div id="accountList">
+                    <!-- 动态渲染 -->
+                </div>
+            </div>
+
+            <!-- Step 2: 资金模式 -->
+            <div class="wizard-panel" id="step2">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">选择运行模式</h3>
+
+                <div class="mode-card" data-mode="paper" onclick="selectMode('paper')">
+                    <div class="mode-header">
+                        <div class="mode-icon paper"><i class="fas fa-flask"></i></div>
+                        <div>
+                            <div class="mode-title">模拟盘</div>
+                            <div class="mode-desc">使用虚拟资金测试策略表现</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-card live" data-mode="live" onclick="selectMode('live')">
+                    <div class="mode-header">
+                        <div class="mode-icon live"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <div class="mode-title">实盘交易</div>
+                            <div class="mode-desc">使用真实资金进行交易</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="live-warning" id="liveWarning">
+                    <div class="live-warning-text">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>实盘交易将使用您的真实资金，可能导致本金损失。请确保您已充分了解策略风险并设置合理的风控参数。</span>
+                    </div>
+                </div>
+
+                <div class="config-section" style="margin-top: 20px;">
+                    <div class="config-title">
+                        <i class="fas fa-wallet"></i>
+                        资金配置
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">策略资金上限</span>
+                        <div class="config-input">
+                            <input type="number" id="allocatedAmount" value="5000" min="100" step="100">
+                            <span>USDT</span>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        账户可用余额: <span id="availableBalance">-</span> USDT
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: 风控参数 -->
+            <div class="wizard-panel" id="step3">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">风控参数设置</h3>
+
+                <div class="config-section">
+                    <div class="config-title">
+                        <i class="fas fa-shield-alt"></i>
+                        止损限制
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">单日最大亏损</span>
+                        <div class="config-input">
+                            <input type="number" id="dailyLossLimit" value="5" min="1" max="50">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">最大回撤</span>
+                        <div class="config-input">
+                            <input type="number" id="maxDrawdown" value="10" min="1" max="50">
+                            <span>%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <div class="config-title">
+                        <i class="fas fa-chart-pie"></i>
+                        仓位控制
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">最大仓位比例</span>
+                        <div class="config-input">
+                            <input type="number" id="maxPositionRatio" value="50" min="10" max="100">
+                            <span>%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <div class="config-title">
+                        <i class="fas fa-power-off"></i>
+                        紧急控制
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">Kill Switch (自动停止)</span>
+                        <div class="toggle-switch active" id="killSwitch" onclick="toggleKillSwitch()"></div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                        触发风控条件时自动暂停策略
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: 确认应用 -->
+            <div class="wizard-panel" id="step4">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">确认应用配置</h3>
+
+                <div class="confirm-section">
+                    <div class="confirm-item">
+                        <span class="confirm-label">策略名称</span>
+                        <span class="confirm-value" id="confirmStrategy">-</span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">交易账户</span>
+                        <span class="confirm-value" id="confirmAccount">-</span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">运行模式</span>
+                        <span class="confirm-value" id="confirmMode">-</span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">资金占用</span>
+                        <span class="confirm-value" id="confirmAmount">-</span>
+                    </div>
+                </div>
+
+                <div class="confirm-section">
+                    <div class="config-title">
+                        <i class="fas fa-shield-alt"></i>
+                        风控参数摘要
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">日亏损限制</span>
+                        <span class="confirm-value" id="confirmDailyLoss">-</span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">最大回撤</span>
+                        <span class="confirm-value" id="confirmMaxDD">-</span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">最大仓位</span>
+                        <span class="confirm-value" id="confirmPosition">-</span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">Kill Switch</span>
+                        <span class="confirm-value" id="confirmKillSwitch">-</span>
+                    </div>
+                </div>
+
+                <div class="risk-disclaimer">
+                    <div class="risk-disclaimer-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        风险提示
+                    </div>
+                    <div class="risk-disclaimer-text">
+                        量化交易存在市场风险，策略收益受市场波动影响。历史回测表现不代表未来收益。请根据自身风险承受能力合理配置资金。
+                    </div>
+                </div>
+
+                <div class="checkbox-row">
+                    <input type="checkbox" id="agreeRisk">
+                    <label class="checkbox-label" for="agreeRisk">
+                        我已阅读并理解上述风险提示，确认应用此策略配置
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部占位 -->
+        <div style="height: 100px;"></div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="wizard-footer">
+        <button class="btn-wizard secondary" id="prevBtn" onclick="prevStep()" style="display: none;">
+            <i class="fas fa-chevron-left"></i>
+            上一步
+        </button>
+        <button class="btn-wizard primary" id="nextBtn" onclick="nextStep()" disabled>
+            下一步
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let currentStrategy = null;
+        let selectedAccount = null;
+        let selectedMode = null;
+        let killSwitchEnabled = true;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const strategyId = localStorage.getItem('current_strategy_id');
+            if (!strategyId) {
+                showToast('未选择策略', 'error');
+                setTimeout(() => window.location.href = 'strategies.html', 1500);
+                return;
+            }
+
+            currentStrategy = store.getMyStrategies().find(s => s.id === strategyId);
+            if (!currentStrategy) {
+                showToast('策略不存在', 'error');
+                setTimeout(() => window.location.href = 'strategies.html', 1500);
+                return;
+            }
+
+            document.getElementById('strategyTitle').textContent = currentStrategy.name;
+            renderAccounts();
+        });
+
+        function renderAccounts() {
+            const accounts = store.getAccounts();
+            const container = document.getElementById('accountList');
+
+            container.innerHTML = accounts.map(acc => {
+                const hasTradePermission = acc.permissions.includes('trade');
+                const isConnected = acc.api_status === 'connected';
+                const isDisabled = !hasTradePermission || !isConnected;
+
+                return `
+                    <div class="account-card ${isDisabled ? 'disabled' : ''}" 
+                         data-id="${acc.id}" 
+                         onclick="${isDisabled ? '' : `selectAccount('${acc.id}')`}">
+                        <div class="account-header">
+                            <span class="account-name">
+                                <i class="fas fa-wallet"></i>
+                                ${acc.name}
+                            </span>
+                            <span class="account-exchange">${acc.exchange}</span>
+                        </div>
+                        <div class="account-balance">
+                            <div class="balance-item">
+                                <div class="balance-value">$${acc.balance_total.toLocaleString()}</div>
+                                <div class="balance-label">总资产</div>
+                            </div>
+                            <div class="balance-item">
+                                <div class="balance-value" style="color: var(--color-success);">$${acc.balance_available.toLocaleString()}</div>
+                                <div class="balance-label">可用余额</div>
+                            </div>
+                        </div>
+                        ${isDisabled ? `
+                            <div style="margin-top: 10px; font-size: 12px; color: var(--color-danger);">
+                                <i class="fas fa-exclamation-circle"></i>
+                                ${!hasTradePermission ? '无交易权限' : 'API 未连接'}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectAccount(accountId) {
+            selectedAccount = store.getAccount(accountId);
+            document.querySelectorAll('.account-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.id === accountId);
+            });
+            document.getElementById('availableBalance').textContent = selectedAccount.balance_available.toLocaleString();
+            updateNextButton();
+        }
+
+        function selectMode(mode) {
+            selectedMode = mode;
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.mode === mode);
+            });
+            document.getElementById('liveWarning').classList.toggle('show', mode === 'live');
+            updateNextButton();
+        }
+
+        function toggleKillSwitch() {
+            killSwitchEnabled = !killSwitchEnabled;
+            document.getElementById('killSwitch').classList.toggle('active', killSwitchEnabled);
+        }
+
+        function updateNextButton() {
+            const nextBtn = document.getElementById('nextBtn');
+            let isValid = false;
+
+            if (currentStep === 1) {
+                isValid = selectedAccount !== null;
+            } else if (currentStep === 2) {
+                isValid = selectedMode !== null &&
+                    parseFloat(document.getElementById('allocatedAmount').value) > 0 &&
+                    parseFloat(document.getElementById('allocatedAmount').value) <= selectedAccount.balance_available;
+            } else if (currentStep === 3) {
+                isValid = true;
+            } else if (currentStep === 4) {
+                isValid = document.getElementById('agreeRisk').checked;
+            }
+
+            nextBtn.disabled = !isValid;
+        }
+
+        function nextStep() {
+            if (currentStep === 4) {
+                submitApplication();
+                return;
+            }
+
+            if (currentStep === 3) {
+                populateConfirmation();
+            }
+
+            currentStep++;
+            updateWizardUI();
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateWizardUI();
+            }
+        }
+
+        function updateWizardUI() {
+            // 更新进度
+            document.querySelectorAll('.wizard-step').forEach((step, idx) => {
+                const stepNum = idx + 1;
+                step.classList.remove('active', 'completed');
+                if (stepNum < currentStep) step.classList.add('completed');
+                if (stepNum === currentStep) step.classList.add('active');
+            });
+
+            // 更新面板
+            document.querySelectorAll('.wizard-panel').forEach((panel, idx) => {
+                panel.classList.toggle('active', idx + 1 === currentStep);
+            });
+
+            // 更新按钮
+            document.getElementById('prevBtn').style.display = currentStep > 1 ? 'flex' : 'none';
+            document.getElementById('nextBtn').innerHTML = currentStep === 4
+                ? '<i class="fas fa-check"></i> 确认应用'
+                : '下一步 <i class="fas fa-chevron-right"></i>';
+
+            updateNextButton();
+        }
+
+        function populateConfirmation() {
+            document.getElementById('confirmStrategy').textContent = currentStrategy.name;
+            document.getElementById('confirmAccount').textContent = `${selectedAccount.name} (${selectedAccount.exchange})`;
+            document.getElementById('confirmMode').innerHTML = selectedMode === 'paper'
+                ? '<span style="color: var(--color-success);"><i class="fas fa-flask"></i> 模拟盘</span>'
+                : '<span style="color: var(--color-danger);"><i class="fas fa-bolt"></i> 实盘</span>';
+            document.getElementById('confirmAmount').textContent = `$${parseFloat(document.getElementById('allocatedAmount').value).toLocaleString()} USDT`;
+            document.getElementById('confirmDailyLoss').textContent = document.getElementById('dailyLossLimit').value + '%';
+            document.getElementById('confirmMaxDD').textContent = document.getElementById('maxDrawdown').value + '%';
+            document.getElementById('confirmPosition').textContent = document.getElementById('maxPositionRatio').value + '%';
+            document.getElementById('confirmKillSwitch').textContent = killSwitchEnabled ? '已启用' : '已禁用';
+        }
+
+        function submitApplication() {
+            const config = {
+                account_id: selectedAccount.id,
+                mode: selectedMode,
+                allocated_amount: parseFloat(document.getElementById('allocatedAmount').value),
+                daily_loss_limit: parseFloat(document.getElementById('dailyLossLimit').value),
+                max_drawdown: parseFloat(document.getElementById('maxDrawdown').value),
+                max_position_ratio: parseFloat(document.getElementById('maxPositionRatio').value),
+                kill_switch: killSwitchEnabled
+            };
+
+            const result = store.applyStrategy(currentStrategy.id, config);
+
+            if (result.success) {
+                localStorage.setItem('current_application_id', result.applicationId);
+                showToast('策略应用成功', 'success');
+                setTimeout(() => {
+                    window.location.href = 'strategy-detail.html';
+                }, 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+
+        // 监听输入变化
+        document.getElementById('allocatedAmount').addEventListener('input', updateNextButton);
+        document.getElementById('agreeRisk').addEventListener('change', updateNextButton);
+
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: 'rgba(34, 197, 94, 0.95)',
+                error: 'rgba(239, 68, 68, 0.95)',
+                warning: 'rgba(245, 158, 11, 0.95)',
+                info: 'rgba(99, 102, 241, 0.95)'
+            };
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+                background: ${colors[type] || colors.info}; color: white; padding: 12px 20px;
+                border-radius: 12px; font-size: 14px; font-weight: 500; z-index: 1000;
+                display: flex; align-items: center; gap: 8px;
+            `;
+            const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+            toast.innerHTML = `<i class="fas fa-${icons[type] || icons.info}"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+    </script>
+</body>
+
+</html>

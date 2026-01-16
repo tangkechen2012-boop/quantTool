@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/mock-data.js"></script>
     <style>
         /* AI聊天底部弹窗样式 */
         .ai-sheet-overlay {
@@ -262,23 +263,9 @@
                 </div>
             </div>
 
-            <!-- 一键操作按钮 (自建策略显示AI修改按钮) -->
-            <div class="grid-3 mb-4" style="grid-template-columns: 1fr 1fr 1fr;">
-                <button class="btn btn-primary btn-block" style="padding: 14px;" id="backtest-btn"
-                    onclick="goToBacktest()">
-                    <i class="fas fa-history"></i>
-                    回测
-                </button>
-                <button class="btn btn-success btn-block" style="padding: 14px;" id="apply-btn">
-                    <i class="fas fa-rocket"></i>
-                    应用
-                </button>
-                <button class="btn btn-secondary btn-block"
-                    style="padding: 14px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); border: none;"
-                    id="ai-modify-btn" onclick="openAISheet()">
-                    <i class="fas fa-magic"></i>
-                    AI修改
-                </button>
+            <!-- 一键操作按钮 (动态渲染) -->
+            <div id="action-buttons" class="mb-4">
+                <!-- 动态渲染 -->
             </div>
 
             <!-- 策略参数 -->
@@ -604,10 +591,16 @@
             }
         }
 
-        // 初始化回测历史区域
+        // 初始化回测历史区域 & 动态按钮
         document.addEventListener('DOMContentLoaded', function () {
             const strategyId = localStorage.getItem('current_my_strategy');
             if (strategyId && typeof store !== 'undefined') {
+                const strategy = store.getMyStrategies().find(s => s.id === strategyId);
+
+                // 渲染动态按钮
+                renderActionButtons(strategy);
+
+                // 回测历史
                 const backtests = store.getBacktestsByStrategy(strategyId);
                 if (backtests.length > 0) {
                     document.getElementById('backtestHistorySection').style.display = 'block';
@@ -627,6 +620,138 @@
                 }
             }
         });
+
+        function renderActionButtons(strategy) {
+            const container = document.getElementById('action-buttons');
+            const status = strategy?.status || 'draft';
+
+            let buttons = '';
+
+            if (status === 'running' || status === 'paused') {
+                // 运行中/暂停 - 显示监控入口
+                buttons = `
+                    <div class="grid-3" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <button class="btn btn-primary btn-block" style="padding: 14px;" onclick="goToMonitor()">
+                            <i class="fas fa-chart-line"></i>
+                            运行监控
+                        </button>
+                        <button class="btn btn-outline btn-block" style="padding: 14px;" onclick="goToBacktest()">
+                            <i class="fas fa-history"></i>
+                            回测
+                        </button>
+                        <button class="btn btn-secondary btn-block" style="padding: 14px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); border: none;" onclick="openAISheet()">
+                            <i class="fas fa-magic"></i>
+                            AI修改
+                        </button>
+                    </div>
+                    <div style="margin-top: 10px; padding: 12px; background: ${status === 'running' ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)'}; border-radius: 10px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-${status === 'running' ? 'play-circle' : 'pause-circle'}" style="color: ${status === 'running' ? 'var(--color-success)' : 'var(--color-warning)'};"></i>
+                        <span style="font-size: 13px;">${status === 'running' ? '策略正在运行中' : '策略已暂停'}</span>
+                    </div>
+                `;
+            } else if (status === 'applied') {
+                // 已应用但未启动
+                buttons = `
+                    <div class="grid-3" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <button class="btn btn-success btn-block" style="padding: 14px;" onclick="startAppliedStrategy()">
+                            <i class="fas fa-play"></i>
+                            启动策略
+                        </button>
+                        <button class="btn btn-outline btn-block" style="padding: 14px;" onclick="goToBacktest()">
+                            <i class="fas fa-history"></i>
+                            回测
+                        </button>
+                        <button class="btn btn-secondary btn-block" style="padding: 14px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); border: none;" onclick="openAISheet()">
+                            <i class="fas fa-magic"></i>
+                            AI修改
+                        </button>
+                    </div>
+                    <div style="margin-top: 10px; padding: 12px; background: rgba(99,102,241,0.1); border-radius: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <i class="fas fa-check-circle" style="color: var(--color-primary);"></i>
+                            <span style="font-size: 13px; font-weight: 500;">策略已配置，等待启动</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted);">点击"启动策略"开始自动交易</div>
+                    </div>
+                `;
+            } else if (status === 'stopped') {
+                // 已停止
+                buttons = `
+                    <div class="grid-3" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <button class="btn btn-primary btn-block" style="padding: 14px;" onclick="goToBacktest()">
+                            <i class="fas fa-history"></i>
+                            回测
+                        </button>
+                        <button class="btn btn-success btn-block" style="padding: 14px;" onclick="goToApply()">
+                            <i class="fas fa-rocket"></i>
+                            应用
+                        </button>
+                        <button class="btn btn-secondary btn-block" style="padding: 14px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); border: none;" onclick="openAISheet()">
+                            <i class="fas fa-magic"></i>
+                            AI修改
+                        </button>
+                    </div>
+                `;
+            } else {
+                // draft/saved/tested - 标准按钮
+                buttons = `
+                    <div class="grid-3" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <button class="btn btn-primary btn-block" style="padding: 14px;" onclick="goToBacktest()">
+                            <i class="fas fa-history"></i>
+                            回测
+                        </button>
+                        <button class="btn btn-success btn-block" style="padding: 14px;" onclick="goToApply()">
+                            <i class="fas fa-rocket"></i>
+                            应用
+                        </button>
+                        <button class="btn btn-secondary btn-block" style="padding: 14px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); border: none;" onclick="openAISheet()">
+                            <i class="fas fa-magic"></i>
+                            AI修改
+                        </button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = buttons;
+        }
+
+        function goToApply() {
+            const strategyId = localStorage.getItem('current_my_strategy');
+            if (strategyId) {
+                localStorage.setItem('current_strategy_id', strategyId);
+                window.location.href = 'strategy-apply.html';
+            }
+        }
+
+        function startAppliedStrategy() {
+            const strategyId = localStorage.getItem('current_my_strategy');
+            if (strategyId) {
+                const strategy = store.getMyStrategies().find(s => s.id === strategyId);
+                if (strategy && strategy.last_application_id) {
+                    const result = store.startStrategy(strategy.last_application_id);
+                    if (result.success) {
+                        localStorage.setItem('current_run_id', result.runId);
+                        showToast('策略已启动', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'strategy-running.html';
+                        }, 1000);
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                }
+            }
+        }
+
+        function goToMonitor() {
+            const strategyId = localStorage.getItem('current_my_strategy');
+            if (strategyId) {
+                const strategy = store.getMyStrategies().find(s => s.id === strategyId);
+                if (strategy && strategy.current_run_id) {
+                    localStorage.setItem('current_run_id', strategy.current_run_id);
+                    window.location.href = 'strategy-running.html';
+                }
+            }
+        }
     </script>
 </body>
 

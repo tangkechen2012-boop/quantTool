@@ -432,6 +432,445 @@ class QuantToolStore {
     if (!localStorage.getItem('backtest_results')) {
       localStorage.setItem('backtest_results', JSON.stringify([]));
     }
+    // 初始化交易账户
+    if (!localStorage.getItem('trading_accounts')) {
+      localStorage.setItem('trading_accounts', JSON.stringify([
+        {
+          id: 'acc_001',
+          exchange: 'OKX',
+          name: '主账户',
+          type: 'spot',
+          balance_total: 50000,
+          balance_available: 35000,
+          balance_locked: 15000,
+          permissions: ['read', 'trade', 'withdraw'],
+          api_status: 'connected',
+          created_at: '2024-01-15'
+        },
+        {
+          id: 'acc_002',
+          exchange: 'Binance',
+          name: '合约账户',
+          type: 'futures',
+          balance_total: 25000,
+          balance_available: 20000,
+          balance_locked: 5000,
+          permissions: ['read', 'trade'],
+          api_status: 'connected',
+          created_at: '2024-03-20'
+        },
+        {
+          id: 'acc_003',
+          exchange: 'OKX',
+          name: '只读账户',
+          type: 'spot',
+          balance_total: 10000,
+          balance_available: 10000,
+          balance_locked: 0,
+          permissions: ['read'],
+          api_status: 'connected',
+          created_at: '2024-06-01'
+        }
+      ]));
+    }
+    // 初始化策略应用配置
+    if (!localStorage.getItem('strategy_applications')) {
+      localStorage.setItem('strategy_applications', JSON.stringify([]));
+    }
+    // 初始化运行中的策略（含仓位/订单/风控事件）
+    if (!localStorage.getItem('running_strategies')) {
+      localStorage.setItem('running_strategies', JSON.stringify([]));
+    }
+  }
+
+  // ===== 交易账户相关 =====
+  getAccounts() {
+    return JSON.parse(localStorage.getItem('trading_accounts') || '[]');
+  }
+
+  getAccount(accountId) {
+    return this.getAccounts().find(a => a.id === accountId);
+  }
+
+  updateAccountBalance(accountId, allocated) {
+    const accounts = this.getAccounts();
+    const idx = accounts.findIndex(a => a.id === accountId);
+    if (idx !== -1) {
+      accounts[idx].balance_available -= allocated;
+      accounts[idx].balance_locked += allocated;
+      localStorage.setItem('trading_accounts', JSON.stringify(accounts));
+    }
+  }
+
+  releaseAccountBalance(accountId, amount) {
+    const accounts = this.getAccounts();
+    const idx = accounts.findIndex(a => a.id === accountId);
+    if (idx !== -1) {
+      accounts[idx].balance_available += amount;
+      accounts[idx].balance_locked -= amount;
+      localStorage.setItem('trading_accounts', JSON.stringify(accounts));
+    }
+  }
+
+  // ===== 策略应用相关 =====
+  getApplications() {
+    return JSON.parse(localStorage.getItem('strategy_applications') || '[]');
+  }
+
+  getApplication(appId) {
+    return this.getApplications().find(a => a.application_id === appId);
+  }
+
+  getApplicationByStrategy(strategyId) {
+    const apps = this.getApplications();
+    return apps.filter(a => a.strategy_id === strategyId);
+  }
+
+  applyStrategy(strategyId, config) {
+    const strategy = this.getMyStrategies().find(s => s.id === strategyId);
+    if (!strategy) return { success: false, message: '策略不存在' };
+
+    const account = this.getAccount(config.account_id);
+    if (!account) return { success: false, message: '账户不存在' };
+    if (!account.permissions.includes('trade')) {
+      return { success: false, message: '该账户没有交易权限' };
+    }
+    if (account.balance_available < config.allocated_amount) {
+      return { success: false, message: '账户余额不足' };
+    }
+
+    const application = {
+      application_id: 'app_' + Date.now(),
+      strategy_id: strategyId,
+      account_id: config.account_id,
+      mode: config.mode, // 'paper' | 'live'
+      allocated_amount: config.allocated_amount,
+      risk_limits: {
+        daily_loss_limit: config.daily_loss_limit || 5,
+        max_drawdown: config.max_drawdown || 10,
+        max_position_ratio: config.max_position_ratio || 50,
+        kill_switch: config.kill_switch !== false
+      },
+      status: 'applied',
+      created_at: new Date().toISOString()
+    };
+
+    // 保存应用
+    const apps = this.getApplications();
+    apps.unshift(application);
+    localStorage.setItem('strategy_applications', JSON.stringify(apps));
+
+    // 更新账户余额（锁定资金）
+    if (config.mode === 'live') {
+      this.updateAccountBalance(config.account_id, config.allocated_amount);
+    }
+
+    // 更新策略状态和关联
+    this.updateMyStrategy(strategyId, {
+      status: 'applied',
+      last_application_id: application.application_id
+    });
+
+    return { success: true, applicationId: application.application_id, message: '策略应用成功' };
+  }
+
+  // ===== 策略运行相关 =====
+  getRunningStrategies() {
+    return JSON.parse(localStorage.getItem('running_strategies') || '[]');
+  }
+
+  getRunningStrategy(runId) {
+    return this.getRunningStrategies().find(r => r.run_id === runId);
+  }
+
+  getRunningByApplication(appId) {
+    return this.getRunningStrategies().find(r => r.application_id === appId);
+  }
+
+  getRunningByStrategy(strategyId) {
+    const runs = this.getRunningStrategies();
+    return runs.filter(r => r.strategy_id === strategyId);
+  }
+
+  startStrategy(applicationId) {
+    const app = this.getApplication(applicationId);
+    if (!app) return { success: false, message: '应用配置不存在' };
+    if (app.status !== 'applied') {
+      return { success: false, message: '只有已应用的策略才能启动' };
+    }
+
+    const strategy = this.getMyStrategies().find(s => s.id === app.strategy_id);
+    const account = this.getAccount(app.account_id);
+
+    // 创建运行记录
+    const runRecord = {
+      run_id: 'run_' + Date.now(),
+      application_id: applicationId,
+      strategy_id: app.strategy_id,
+      strategy_name: strategy?.name || '未知策略',
+      account_id: app.account_id,
+      account_name: account?.name || '未知账户',
+      exchange: account?.exchange || 'Unknown',
+      mode: app.mode,
+      status: 'running',
+      started_at: new Date().toISOString(),
+      funds: {
+        allocated: app.allocated_amount,
+        available_snapshot: account?.balance_available || 0,
+        used: 0
+      },
+      risk_limits: app.risk_limits,
+      metrics: {
+        today_pnl: 0,
+        today_pnl_percent: 0,
+        total_return: 0,
+        total_return_percent: 0,
+        max_drawdown: 0,
+        win_rate: 0,
+        trade_count: 0,
+        last_updated: new Date().toISOString()
+      },
+      positions: [],
+      orders: [],
+      recent_trades: [],
+      risk_events: []
+    };
+
+    // 生成一些 mock 数据
+    this._generateMockRunningData(runRecord, strategy);
+
+    // 保存运行记录
+    const runs = this.getRunningStrategies();
+    runs.unshift(runRecord);
+    localStorage.setItem('running_strategies', JSON.stringify(runs));
+
+    // 更新应用状态
+    const apps = this.getApplications();
+    const appIdx = apps.findIndex(a => a.application_id === applicationId);
+    if (appIdx !== -1) {
+      apps[appIdx].status = 'running';
+      apps[appIdx].run_id = runRecord.run_id;
+      localStorage.setItem('strategy_applications', JSON.stringify(apps));
+    }
+
+    // 更新策略状态
+    this.updateMyStrategy(app.strategy_id, {
+      status: 'running',
+      current_run_id: runRecord.run_id
+    });
+
+    return { success: true, runId: runRecord.run_id, message: '策略已启动' };
+  }
+
+  _generateMockRunningData(run, strategy) {
+    const seed = this._hashCode(run.run_id);
+    const r = (offset) => this._seededRandom(seed + offset);
+
+    // Mock 指标
+    run.metrics.today_pnl = Math.round((r(1) * 500 - 100) * 100) / 100;
+    run.metrics.today_pnl_percent = Math.round(run.metrics.today_pnl / run.funds.allocated * 100 * 100) / 100;
+    run.metrics.total_return = Math.round((r(2) * 2000 - 200) * 100) / 100;
+    run.metrics.total_return_percent = Math.round(run.metrics.total_return / run.funds.allocated * 100 * 100) / 100;
+    run.metrics.max_drawdown = Math.round(r(3) * 8 * 100) / 100;
+    run.metrics.win_rate = Math.round((50 + r(4) * 30) * 10) / 10;
+    run.metrics.trade_count = Math.floor(10 + r(5) * 50);
+
+    // Mock 持仓
+    const pairs = strategy?.supported_pairs || ['BTC/USDT'];
+    if (r(6) > 0.3) {
+      run.positions.push({
+        pair: pairs[0],
+        side: r(7) > 0.5 ? 'long' : 'short',
+        size: Math.round((0.01 + r(8) * 0.1) * 1000) / 1000,
+        entry_price: Math.round((40000 + r(9) * 10000) * 100) / 100,
+        current_price: Math.round((40000 + r(10) * 10000) * 100) / 100,
+        unrealized_pnl: Math.round((r(11) * 200 - 50) * 100) / 100,
+        leverage: 1
+      });
+    }
+
+    // Mock 挂单
+    if (r(12) > 0.5) {
+      run.orders.push({
+        order_id: 'ord_' + Date.now(),
+        pair: pairs[0],
+        side: 'buy',
+        type: 'limit',
+        price: Math.round((38000 + r(13) * 2000) * 100) / 100,
+        size: Math.round((0.01 + r(14) * 0.05) * 1000) / 1000,
+        filled: 0,
+        status: 'open',
+        created_at: new Date(Date.now() - r(15) * 3600000).toISOString()
+      });
+    }
+
+    // Mock 最近成交
+    for (let i = 0; i < 3; i++) {
+      run.recent_trades.push({
+        trade_id: 'trd_' + (Date.now() - i * 1000),
+        pair: pairs[0],
+        side: r(20 + i) > 0.5 ? 'buy' : 'sell',
+        price: Math.round((40000 + r(21 + i) * 5000) * 100) / 100,
+        size: Math.round((0.01 + r(22 + i) * 0.05) * 1000) / 1000,
+        fee: Math.round(r(23 + i) * 2 * 100) / 100,
+        pnl: Math.round((r(24 + i) * 100 - 20) * 100) / 100,
+        executed_at: new Date(Date.now() - (i + 1) * 3600000).toISOString()
+      });
+    }
+  }
+
+  pauseStrategy(runId) {
+    const runs = this.getRunningStrategies();
+    const idx = runs.findIndex(r => r.run_id === runId);
+    if (idx === -1) return { success: false, message: '运行记录不存在' };
+    if (runs[idx].status !== 'running') {
+      return { success: false, message: '只有运行中的策略才能暂停' };
+    }
+
+    runs[idx].status = 'paused';
+    runs[idx].paused_at = new Date().toISOString();
+    localStorage.setItem('running_strategies', JSON.stringify(runs));
+
+    // 更新策略状态
+    this.updateMyStrategy(runs[idx].strategy_id, { status: 'paused' });
+
+    // 记录风控事件
+    this.addRiskEvent(runId, {
+      type: 'manual_pause',
+      reason: '用户手动暂停',
+      action: 'paused',
+      triggered_at: new Date().toISOString()
+    });
+
+    return { success: true, message: '策略已暂停' };
+  }
+
+  resumeStrategy(runId) {
+    const runs = this.getRunningStrategies();
+    const idx = runs.findIndex(r => r.run_id === runId);
+    if (idx === -1) return { success: false, message: '运行记录不存在' };
+    if (runs[idx].status !== 'paused') {
+      return { success: false, message: '只有已暂停的策略才能恢复' };
+    }
+
+    runs[idx].status = 'running';
+    runs[idx].resumed_at = new Date().toISOString();
+    localStorage.setItem('running_strategies', JSON.stringify(runs));
+
+    // 更新策略状态
+    this.updateMyStrategy(runs[idx].strategy_id, { status: 'running' });
+
+    return { success: true, message: '策略已恢复运行' };
+  }
+
+  stopStrategy(runId) {
+    const runs = this.getRunningStrategies();
+    const idx = runs.findIndex(r => r.run_id === runId);
+    if (idx === -1) return { success: false, message: '运行记录不存在' };
+    if (!['running', 'paused'].includes(runs[idx].status)) {
+      return { success: false, message: '策略状态无法停止' };
+    }
+
+    const run = runs[idx];
+    run.status = 'stopped';
+    run.stopped_at = new Date().toISOString();
+    localStorage.setItem('running_strategies', JSON.stringify(runs));
+
+    // 释放资金（如果是实盘）
+    const app = this.getApplication(run.application_id);
+    if (app?.mode === 'live') {
+      this.releaseAccountBalance(run.account_id, app.allocated_amount);
+    }
+
+    // 更新应用状态
+    const apps = this.getApplications();
+    const appIdx = apps.findIndex(a => a.application_id === run.application_id);
+    if (appIdx !== -1) {
+      apps[appIdx].status = 'stopped';
+      localStorage.setItem('strategy_applications', JSON.stringify(apps));
+    }
+
+    // 更新策略状态
+    this.updateMyStrategy(run.strategy_id, { status: 'stopped' });
+
+    return { success: true, message: '策略已停止' };
+  }
+
+  emergencyClose(runId) {
+    const runs = this.getRunningStrategies();
+    const idx = runs.findIndex(r => r.run_id === runId);
+    if (idx === -1) return { success: false, message: '运行记录不存在' };
+
+    // 清空持仓
+    runs[idx].positions = [];
+    // 取消所有挂单
+    runs[idx].orders = runs[idx].orders.map(o => ({ ...o, status: 'cancelled' }));
+    localStorage.setItem('running_strategies', JSON.stringify(runs));
+
+    // 记录风控事件
+    this.addRiskEvent(runId, {
+      type: 'emergency_close',
+      reason: '用户触发紧急平仓',
+      action: 'all_positions_closed',
+      triggered_at: new Date().toISOString()
+    });
+
+    return { success: true, message: '已执行紧急平仓' };
+  }
+
+  triggerRiskEvent(runId, eventType) {
+    const runs = this.getRunningStrategies();
+    const idx = runs.findIndex(r => r.run_id === runId);
+    if (idx === -1) return { success: false, message: '运行记录不存在' };
+
+    const eventTypes = {
+      'daily_loss': { reason: '触发日亏损限制', action: 'paused' },
+      'max_drawdown': { reason: '触发最大回撤限制', action: 'paused' },
+      'api_error': { reason: 'API 连接异常', action: 'paused' },
+      'order_failed': { reason: '下单失败', action: 'alert' }
+    };
+
+    const event = eventTypes[eventType] || { reason: '未知风控事件', action: 'alert' };
+
+    this.addRiskEvent(runId, {
+      type: eventType,
+      reason: event.reason,
+      action: event.action,
+      triggered_at: new Date().toISOString()
+    });
+
+    if (event.action === 'paused') {
+      runs[idx].status = 'paused';
+      runs[idx].paused_at = new Date().toISOString();
+      runs[idx].error_message = event.reason;
+      localStorage.setItem('running_strategies', JSON.stringify(runs));
+      this.updateMyStrategy(runs[idx].strategy_id, { status: 'paused' });
+    }
+
+    return { success: true, message: event.reason };
+  }
+
+  addRiskEvent(runId, event) {
+    const runs = this.getRunningStrategies();
+    const idx = runs.findIndex(r => r.run_id === runId);
+    if (idx !== -1) {
+      runs[idx].risk_events.unshift(event);
+      localStorage.setItem('running_strategies', JSON.stringify(runs));
+    }
+  }
+
+  // ===== 重置演示数据 =====
+  resetAllData() {
+    localStorage.removeItem('marketplace_strategies');
+    localStorage.removeItem('my_strategies');
+    localStorage.removeItem('purchased_strategies');
+    localStorage.removeItem('marketplace_filters');
+    localStorage.removeItem('backtest_results');
+    localStorage.removeItem('trading_accounts');
+    localStorage.removeItem('strategy_applications');
+    localStorage.removeItem('running_strategies');
+    this.init();
+    return { success: true, message: '所有数据已重置' };
   }
 
   // ===== 回测相关方法 =====
